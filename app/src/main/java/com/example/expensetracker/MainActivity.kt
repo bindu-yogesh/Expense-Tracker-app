@@ -1,5 +1,6 @@
 package com.example.expensetracker
 
+import com.example.expensetracker.ui.screens.DashboardScreen
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -30,6 +31,7 @@ class MainActivity : ComponentActivity() {
         setContent {
             ExpenseTrackerTheme {
                 // Dashboard will be added here
+                DashboardScreen(viewModel = viewModel)
             }
         }
     }
