@@ -29,7 +29,7 @@ class MainActivity : ComponentActivity() {
 
         setContent {
             ExpenseTrackerTheme {
-                // UI will come here
+                // Dashboard will be added here
             }
         }
     }
