@@ -138,7 +138,7 @@ fun AddExpenseScreen(
                         note = note.trim()
                     )
 
-                    viewModel.addExpense(transaction)
+                    viewModel.addTransaction(transaction)
 
                     onTransactionSaved()
                 }

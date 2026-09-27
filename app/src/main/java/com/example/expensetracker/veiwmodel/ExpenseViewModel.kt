@@ -3,8 +3,10 @@ package com.example.expensetracker.viewmodel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.expensetracker.data.local.ExpenseEntity
+import com.example.expensetracker.data.repository.ExpenseRepository
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
@@ -48,7 +50,7 @@ class ExpenseViewModel(
             )
 
     val balance: StateFlow<Long> =
-        kotlinx.coroutines.flow.combine(
+        combine(
             totalIncome,
             totalExpenses
         ) { income, expenses ->
@@ -59,9 +61,9 @@ class ExpenseViewModel(
             initialValue = 0L
         )
 
-    fun addExpense(expense: ExpenseEntity) {
+    fun addTransaction(transaction: ExpenseEntity) {
         viewModelScope.launch {
-            repository.insertExpense(expense)
+            repository.insertExpense(transaction)
         }
     }
 
