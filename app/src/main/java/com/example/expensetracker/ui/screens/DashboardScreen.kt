@@ -22,7 +22,6 @@ import com.example.expensetracker.viewmodel.ExpenseViewModel
 fun DashboardScreen(
     viewModel: ExpenseViewModel
 ) {
-
     val balance by viewModel.balance.collectAsStateWithLifecycle()
     val income by viewModel.totalIncome.collectAsStateWithLifecycle()
     val expenses by viewModel.totalExpenses.collectAsStateWithLifecycle()
@@ -56,7 +55,6 @@ fun DashboardScreen(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.spacedBy(12.dp)
         ) {
-
             SummaryCard(
                 title = "Income",
                 amount = income,
@@ -98,7 +96,6 @@ private fun SummaryCard(
         Column(
             modifier = Modifier.padding(16.dp)
         ) {
-
             Text(
                 text = title,
                 style = MaterialTheme.typography.labelLarge
