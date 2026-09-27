@@ -1,6 +1,5 @@
 package com.example.expensetracker.ui.screens
 
-import androidx.compose.material3.Button
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -9,6 +8,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -17,6 +17,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.example.expensetracker.data.local.ExpenseEntity
 import com.example.expensetracker.viewmodel.ExpenseViewModel
 
 @Composable
@@ -24,9 +25,11 @@ fun DashboardScreen(
     viewModel: ExpenseViewModel,
     onAddTransaction: () -> Unit
 ) {
+
     val balance by viewModel.balance.collectAsStateWithLifecycle()
     val income by viewModel.totalIncome.collectAsStateWithLifecycle()
     val expenses by viewModel.totalExpenses.collectAsStateWithLifecycle()
+    val transactions by viewModel.expenses.collectAsStateWithLifecycle()
 
     Column(
         modifier = Modifier
@@ -34,12 +37,6 @@ fun DashboardScreen(
             .padding(20.dp)
     ) {
 
-        Button(
-            onClick = onAddTransaction,
-            modifier = Modifier.fillMaxWidth()
-        ) {
-            Text("Add Transaction")
-        }
         Text(
             text = "Good evening 👋",
             style = MaterialTheme.typography.headlineMedium
@@ -63,6 +60,7 @@ fun DashboardScreen(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.spacedBy(12.dp)
         ) {
+
             SummaryCard(
                 title = "Income",
                 amount = income,
@@ -85,10 +83,35 @@ fun DashboardScreen(
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        Text(
-            text = "No transactions yet",
-            style = MaterialTheme.typography.bodyLarge
-        )
+        if (transactions.isEmpty()) {
+
+            Text(
+                text = "No transactions yet",
+                style = MaterialTheme.typography.bodyLarge
+            )
+
+        } else {
+
+            transactions
+                .take(5)
+                .forEach { transaction ->
+
+                    TransactionItem(
+                        transaction = transaction
+                    )
+
+                    Spacer(modifier = Modifier.height(8.dp))
+                }
+        }
+
+        Spacer(modifier = Modifier.height(24.dp))
+
+        Button(
+            onClick = onAddTransaction,
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Text("Add Transaction")
+        }
     }
 }
 
@@ -104,6 +127,7 @@ private fun SummaryCard(
         Column(
             modifier = Modifier.padding(16.dp)
         ) {
+
             Text(
                 text = title,
                 style = MaterialTheme.typography.labelLarge
@@ -114,6 +138,46 @@ private fun SummaryCard(
             Text(
                 text = "₹$amount",
                 style = MaterialTheme.typography.titleLarge
+            )
+        }
+    }
+}
+
+@Composable
+private fun TransactionItem(
+    transaction: ExpenseEntity
+) {
+    Card(
+        modifier = Modifier.fillMaxWidth()
+    ) {
+
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp),
+            horizontalArrangement = Arrangement.SpaceBetween
+        ) {
+
+            Column {
+
+                Text(
+                    text = transaction.title,
+                    style = MaterialTheme.typography.titleMedium
+                )
+
+                Text(
+                    text = transaction.category,
+                    style = MaterialTheme.typography.bodyMedium
+                )
+            }
+
+            Text(
+                text = if (transaction.type == "INCOME") {
+                    "+₹${transaction.amount}"
+                } else {
+                    "-₹${transaction.amount}"
+                },
+                style = MaterialTheme.typography.titleMedium
             )
         }
     }
