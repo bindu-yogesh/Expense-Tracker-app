@@ -21,7 +21,10 @@ fun AppNavigation(
 
         composable("dashboard") {
             DashboardScreen(
-                viewModel = viewModel
+                viewModel = viewModel,
+                onAddTransaction = {
+                    navController.navigate("add_transaction")
+                }
             )
         }
 
