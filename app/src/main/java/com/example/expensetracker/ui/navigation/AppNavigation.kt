@@ -25,6 +25,9 @@ fun AppNavigation(
                 viewModel = viewModel,
                 onAddTransaction = {
                     navController.navigate("add_transaction")
+                },
+                onViewAllTransactions = {
+                    navController.navigate("transaction_history")
                 }
             )
         }
