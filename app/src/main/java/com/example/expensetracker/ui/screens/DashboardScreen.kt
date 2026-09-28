@@ -1,5 +1,6 @@
 package com.example.expensetracker.ui.screens
 
+import androidx.compose.material3.TextButton
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -23,7 +24,8 @@ import com.example.expensetracker.viewmodel.ExpenseViewModel
 @Composable
 fun DashboardScreen(
     viewModel: ExpenseViewModel,
-    onAddTransaction: () -> Unit
+    onAddTransaction: () -> Unit,
+    onViewAllTransactions: () -> Unit
 ) {
 
     val balance by viewModel.balance.collectAsStateWithLifecycle()
@@ -111,6 +113,15 @@ fun DashboardScreen(
             modifier = Modifier.fillMaxWidth()
         ) {
             Text("Add Transaction")
+        }
+
+        Spacer(modifier = Modifier.height(8.dp))
+
+        TextButton(
+            onClick = onViewAllTransactions,
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Text("View All Transactions")
         }
     }
 }
