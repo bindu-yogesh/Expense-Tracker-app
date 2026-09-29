@@ -29,7 +29,8 @@ import com.example.expensetracker.viewmodel.ExpenseViewModel
 @Composable
 fun TransactionHistoryScreen(
     viewModel: ExpenseViewModel,
-    onBack: () -> Unit
+    onBack: () -> Unit,
+    onEdit: (Long) -> Unit
 ) {
     val transactions by viewModel.expenses.collectAsStateWithLifecycle()
 
@@ -76,6 +77,9 @@ fun TransactionHistoryScreen(
 
                     TransactionHistoryItem(
                         transaction = transaction,
+                        onEdit = {
+                            onEdit(transaction.id)
+                        },
                         onDelete = {
                             transactionToDelete = transaction
                         }
@@ -137,6 +141,7 @@ fun TransactionHistoryScreen(
 @Composable
 private fun TransactionHistoryItem(
     transaction: ExpenseEntity,
+    onEdit: () -> Unit,
     onDelete: () -> Unit
 ) {
     Card(
@@ -175,6 +180,12 @@ private fun TransactionHistoryItem(
                     },
                     style = MaterialTheme.typography.titleMedium
                 )
+
+                TextButton(
+                    onClick = onEdit
+                ) {
+                    Text("Edit")
+                }
 
                 TextButton(
                     onClick = onDelete
