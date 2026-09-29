@@ -1,6 +1,5 @@
 package com.example.expensetracker.ui.screens
 
-import androidx.compose.material3.TextButton
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -11,11 +10,16 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Card
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -29,16 +33,22 @@ fun TransactionHistoryScreen(
 ) {
     val transactions by viewModel.expenses.collectAsStateWithLifecycle()
 
+    var transactionToDelete by remember {
+        mutableStateOf<ExpenseEntity?>(null)
+    }
+
     Column(
         modifier = Modifier
             .fillMaxSize()
             .padding(20.dp)
     ) {
+
         TextButton(
             onClick = onBack
         ) {
             Text("← Back")
         }
+
         Text(
             text = "All Transactions",
             style = MaterialTheme.typography.headlineMedium
@@ -58,23 +68,76 @@ fun TransactionHistoryScreen(
             LazyColumn(
                 verticalArrangement = Arrangement.spacedBy(10.dp)
             ) {
+
                 items(
                     items = transactions,
                     key = { it.id }
                 ) { transaction ->
 
                     TransactionHistoryItem(
-                        transaction = transaction
+                        transaction = transaction,
+                        onDelete = {
+                            transactionToDelete = transaction
+                        }
                     )
                 }
             }
         }
     }
+
+    // Delete confirmation dialog
+    if (transactionToDelete != null) {
+
+        AlertDialog(
+            onDismissRequest = {
+                transactionToDelete = null
+            },
+
+            title = {
+                Text("Delete Transaction?")
+            },
+
+            text = {
+                Text(
+                    "Are you sure you want to delete " +
+                            "\"${transactionToDelete?.title}\"?"
+                )
+            },
+
+            confirmButton = {
+
+                TextButton(
+                    onClick = {
+
+                        transactionToDelete?.let { transaction ->
+                            viewModel.deleteExpense(transaction)
+                        }
+
+                        transactionToDelete = null
+                    }
+                ) {
+                    Text("Delete")
+                }
+            },
+
+            dismissButton = {
+
+                TextButton(
+                    onClick = {
+                        transactionToDelete = null
+                    }
+                ) {
+                    Text("Cancel")
+                }
+            }
+        )
+    }
 }
 
 @Composable
 private fun TransactionHistoryItem(
-    transaction: ExpenseEntity
+    transaction: ExpenseEntity,
+    onDelete: () -> Unit
 ) {
     Card(
         modifier = Modifier.fillMaxWidth()
@@ -102,14 +165,23 @@ private fun TransactionHistoryItem(
                 )
             }
 
-            Text(
-                text = if (transaction.type == "INCOME") {
-                    "+₹${transaction.amount}"
-                } else {
-                    "-₹${transaction.amount}"
-                },
-                style = MaterialTheme.typography.titleMedium
-            )
+            Column {
+
+                Text(
+                    text = if (transaction.type == "INCOME") {
+                        "+₹${transaction.amount}"
+                    } else {
+                        "-₹${transaction.amount}"
+                    },
+                    style = MaterialTheme.typography.titleMedium
+                )
+
+                TextButton(
+                    onClick = onDelete
+                ) {
+                    Text("Delete")
+                }
+            }
         }
     }
 }
