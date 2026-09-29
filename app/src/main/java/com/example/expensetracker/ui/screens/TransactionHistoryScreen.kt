@@ -1,5 +1,6 @@
 package com.example.expensetracker.ui.screens
 
+import androidx.compose.material3.TextButton
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -23,7 +24,8 @@ import com.example.expensetracker.viewmodel.ExpenseViewModel
 
 @Composable
 fun TransactionHistoryScreen(
-    viewModel: ExpenseViewModel
+    viewModel: ExpenseViewModel,
+    onBack: () -> Unit
 ) {
     val transactions by viewModel.expenses.collectAsStateWithLifecycle()
 
@@ -32,7 +34,11 @@ fun TransactionHistoryScreen(
             .fillMaxSize()
             .padding(20.dp)
     ) {
-
+        TextButton(
+            onClick = onBack
+        ) {
+            Text("← Back")
+        }
         Text(
             text = "All Transactions",
             style = MaterialTheme.typography.headlineMedium

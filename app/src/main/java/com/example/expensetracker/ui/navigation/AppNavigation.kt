@@ -43,7 +43,10 @@ fun AppNavigation(
 
         composable("transaction_history") {
             TransactionHistoryScreen(
-                viewModel = viewModel
+                viewModel = viewModel,
+                onBack = {
+                    navController.popBackStack()
+                }
             )
         }
     }
