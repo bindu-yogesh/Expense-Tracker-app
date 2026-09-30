@@ -8,31 +8,26 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.example.expensetracker.data.local.ExpenseEntity
 import com.example.expensetracker.viewmodel.ExpenseViewModel
 
 @Composable
-fun DashboardScreen(
+fun AnalyticsScreen(
     viewModel: ExpenseViewModel,
-    onAddTransaction: () -> Unit,
-    onViewAllTransactions: () -> Unit,
-    onViewAnalytics: () -> Unit
+    onBack: () -> Unit
 ) {
-
+    val totalIncome by viewModel.totalIncome.collectAsStateWithLifecycle()
+    val totalExpenses by viewModel.totalExpenses.collectAsStateWithLifecycle()
     val balance by viewModel.balance.collectAsStateWithLifecycle()
-    val income by viewModel.totalIncome.collectAsStateWithLifecycle()
-    val expenses by viewModel.totalExpenses.collectAsStateWithLifecycle()
-    val transactions by viewModel.expenses.collectAsStateWithLifecycle()
+    val expensesByCategory by viewModel.expensesByCategory
+        .collectAsStateWithLifecycle()
 
     Column(
         modifier = Modifier
@@ -41,26 +36,23 @@ fun DashboardScreen(
     ) {
 
         Text(
-            text = "Good evening 👋",
+            text = "← Back",
+            style = MaterialTheme.typography.titleMedium,
+            modifier = Modifier
+                .fillMaxWidth()
+        )
+
+        Spacer(
+            modifier = Modifier.height(16.dp)
+        )
+
+        Text(
+            text = "Analytics",
             style = MaterialTheme.typography.headlineMedium
         )
 
         Spacer(
-            modifier = Modifier.height(24.dp)
-        )
-
-        Text(
-            text = "Total Balance",
-            style = MaterialTheme.typography.labelLarge
-        )
-
-        Text(
-            text = "₹$balance",
-            style = MaterialTheme.typography.displaySmall
-        )
-
-        Spacer(
-            modifier = Modifier.height(24.dp)
+            modifier = Modifier.height(20.dp)
         )
 
         Row(
@@ -68,47 +60,59 @@ fun DashboardScreen(
             horizontalArrangement = Arrangement.spacedBy(12.dp)
         ) {
 
-            SummaryCard(
+            AnalyticsCard(
                 title = "Income",
-                amount = income,
+                amount = totalIncome,
                 modifier = Modifier.weight(1f)
             )
 
-            SummaryCard(
+            AnalyticsCard(
                 title = "Expenses",
-                amount = expenses,
+                amount = totalExpenses,
                 modifier = Modifier.weight(1f)
             )
         }
 
         Spacer(
-            modifier = Modifier.height(32.dp)
+            modifier = Modifier.height(12.dp)
+        )
+
+        AnalyticsCard(
+            title = "Balance",
+            amount = balance,
+            modifier = Modifier.fillMaxWidth()
+        )
+
+        Spacer(
+            modifier = Modifier.height(28.dp)
         )
 
         Text(
-            text = "Recent Transactions",
+            text = "Expenses by Category",
             style = MaterialTheme.typography.titleLarge
         )
 
         Spacer(
-            modifier = Modifier.height(16.dp)
+            modifier = Modifier.height(12.dp)
         )
 
-        if (transactions.isEmpty()) {
+        if (expensesByCategory.isEmpty()) {
 
             Text(
-                text = "No transactions yet",
+                text = "No expense data available",
                 style = MaterialTheme.typography.bodyLarge
             )
 
         } else {
 
-            transactions
-                .take(5)
-                .forEach { transaction ->
+            expensesByCategory
+                .toList()
+                .sortedByDescending { it.second }
+                .forEach { (category, amount) ->
 
-                    TransactionItem(
-                        transaction = transaction
+                    CategoryExpenseItem(
+                        category = category,
+                        amount = amount
                     )
 
                     Spacer(
@@ -116,44 +120,11 @@ fun DashboardScreen(
                     )
                 }
         }
-
-        Spacer(
-            modifier = Modifier.height(24.dp)
-        )
-
-        Button(
-            onClick = onAddTransaction,
-            modifier = Modifier.fillMaxWidth()
-        ) {
-            Text("Add Transaction")
-        }
-
-        Spacer(
-            modifier = Modifier.height(8.dp)
-        )
-
-        TextButton(
-            onClick = onViewAllTransactions,
-            modifier = Modifier.fillMaxWidth()
-        ) {
-            Text("View All Transactions")
-        }
-
-        Spacer(
-            modifier = Modifier.height(8.dp)
-        )
-
-        TextButton(
-            onClick = onViewAnalytics,
-            modifier = Modifier.fillMaxWidth()
-        ) {
-            Text("View Analytics 📊")
-        }
     }
 }
 
 @Composable
-private fun SummaryCard(
+private fun AnalyticsCard(
     title: String,
     amount: Long,
     modifier: Modifier = Modifier
@@ -184,8 +155,9 @@ private fun SummaryCard(
 }
 
 @Composable
-private fun TransactionItem(
-    transaction: ExpenseEntity
+private fun CategoryExpenseItem(
+    category: String,
+    amount: Long
 ) {
     Card(
         modifier = Modifier.fillMaxWidth()
@@ -198,25 +170,13 @@ private fun TransactionItem(
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
 
-            Column {
-
-                Text(
-                    text = transaction.title,
-                    style = MaterialTheme.typography.titleMedium
-                )
-
-                Text(
-                    text = transaction.category,
-                    style = MaterialTheme.typography.bodyMedium
-                )
-            }
+            Text(
+                text = category,
+                style = MaterialTheme.typography.titleMedium
+            )
 
             Text(
-                text = if (transaction.type == "INCOME") {
-                    "+₹${transaction.amount}"
-                } else {
-                    "-₹${transaction.amount}"
-                },
+                text = "₹$amount",
                 style = MaterialTheme.typography.titleMedium
             )
         }

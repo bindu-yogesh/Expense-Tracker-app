@@ -10,7 +10,6 @@ import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
-
 class ExpenseViewModel(
     private val repository: ExpenseRepository
 ) : ViewModel() {
@@ -48,7 +47,21 @@ class ExpenseViewModel(
                 started = SharingStarted.WhileSubscribed(5000),
                 initialValue = 0L
             )
-
+    val expensesByCategory: StateFlow<Map<String, Long>> =
+        expenses
+            .map { list ->
+                list
+                    .filter { it.type == "EXPENSE" }
+                    .groupBy { it.category }
+                    .mapValues { (_, transactions) ->
+                        transactions.sumOf { it.amount }
+                    }
+            }
+            .stateIn(
+                scope = viewModelScope,
+                started = SharingStarted.WhileSubscribed(5000),
+                initialValue = emptyMap()
+            )
     val balance: StateFlow<Long> =
         combine(
             totalIncome,

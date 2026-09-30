@@ -9,6 +9,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.example.expensetracker.ui.screens.AddExpenseScreen
+import com.example.expensetracker.ui.screens.AnalyticsScreen
 import com.example.expensetracker.ui.screens.DashboardScreen
 import com.example.expensetracker.ui.screens.EditTransactionScreen
 import com.example.expensetracker.ui.screens.TransactionHistoryScreen
@@ -37,6 +38,22 @@ fun AppNavigation(
 
                 onViewAllTransactions = {
                     navController.navigate("transaction_history")
+                },
+
+                onViewAnalytics = {
+                    navController.navigate("analytics")
+                }
+            )
+        }
+
+        // Analytics
+        composable("analytics") {
+
+            AnalyticsScreen(
+                viewModel = viewModel,
+
+                onBack = {
+                    navController.popBackStack()
                 }
             )
         }
