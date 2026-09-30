@@ -39,13 +39,11 @@ fun AppNavigation(
                 onViewAllTransactions = {
                     navController.navigate("transaction_history")
                 },
-
                 onViewAnalytics = {
                     navController.navigate("analytics")
                 }
             )
         }
-
         // Analytics
         composable("analytics") {
 
@@ -57,7 +55,6 @@ fun AppNavigation(
                 }
             )
         }
-
         // Add Transaction
         composable("add_transaction") {
 
@@ -69,7 +66,6 @@ fun AppNavigation(
                 }
             )
         }
-
         // Transaction History
         composable("transaction_history") {
 
