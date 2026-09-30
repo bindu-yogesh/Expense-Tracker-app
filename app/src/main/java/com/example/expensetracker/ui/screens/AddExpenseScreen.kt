@@ -5,18 +5,25 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Button
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.runtime.*
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.ui.unit.dp
+import com.example.expensetracker.data.expenseCategories
 import com.example.expensetracker.data.local.ExpenseEntity
 import com.example.expensetracker.viewmodel.ExpenseViewModel
 
@@ -25,13 +32,12 @@ fun AddExpenseScreen(
     viewModel: ExpenseViewModel,
     onTransactionSaved: () -> Unit
 ) {
-
     var title by remember { mutableStateOf("") }
     var amount by remember { mutableStateOf("") }
     var category by remember { mutableStateOf("") }
     var note by remember { mutableStateOf("") }
-
     var isIncome by remember { mutableStateOf(false) }
+    var categoryExpanded by remember { mutableStateOf(false) }
 
     Column(
         modifier = Modifier.padding(20.dp),
@@ -100,13 +106,47 @@ fun AddExpenseScreen(
             )
         )
 
-        OutlinedTextField(
-            value = category,
-            onValueChange = { category = it },
-            label = { Text("Category") },
-            modifier = Modifier.fillMaxWidth(),
-            singleLine = true
-        )
+        // Category dropdown
+        Column(
+            modifier = Modifier.fillMaxWidth()
+        ) {
+
+            OutlinedButton(
+                onClick = {
+                    categoryExpanded = true
+                },
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Text(
+                    text = if (category.isEmpty()) {
+                        "Select Category"
+                    } else {
+                        category
+                    }
+                )
+            }
+
+            DropdownMenu(
+                expanded = categoryExpanded,
+                onDismissRequest = {
+                    categoryExpanded = false
+                }
+            ) {
+
+                expenseCategories.forEach { item ->
+
+                    DropdownMenuItem(
+                        text = {
+                            Text(item)
+                        },
+                        onClick = {
+                            category = item
+                            categoryExpanded = false
+                        }
+                    )
+                }
+            }
+        }
 
         OutlinedTextField(
             value = note,
@@ -115,7 +155,9 @@ fun AddExpenseScreen(
             modifier = Modifier.fillMaxWidth()
         )
 
-        Spacer(modifier = Modifier.height(8.dp))
+        Spacer(
+            modifier = Modifier.height(8.dp)
+        )
 
         Button(
             onClick = {
@@ -132,8 +174,12 @@ fun AddExpenseScreen(
                     val transaction = ExpenseEntity(
                         title = title.trim(),
                         amount = amountValue,
-                        category = category.trim(),
-                        type = if (isIncome) "INCOME" else "EXPENSE",
+                        category = category,
+                        type = if (isIncome) {
+                            "INCOME"
+                        } else {
+                            "EXPENSE"
+                        },
                         date = System.currentTimeMillis(),
                         note = note.trim()
                     )

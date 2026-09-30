@@ -6,6 +6,8 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Button
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
@@ -19,6 +21,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.ui.unit.dp
+import com.example.expensetracker.data.expenseCategories
 import com.example.expensetracker.data.local.ExpenseEntity
 import com.example.expensetracker.viewmodel.ExpenseViewModel
 
@@ -29,7 +32,6 @@ fun EditTransactionScreen(
     onTransactionUpdated: () -> Unit,
     onBack: () -> Unit
 ) {
-
     var title by remember {
         mutableStateOf(transaction.title)
     }
@@ -50,9 +52,12 @@ fun EditTransactionScreen(
         mutableStateOf(transaction.type == "INCOME")
     }
 
+    var categoryExpanded by remember {
+        mutableStateOf(false)
+    }
+
     Column(
-        modifier = Modifier
-            .padding(20.dp),
+        modifier = Modifier.padding(20.dp),
         verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
 
@@ -67,6 +72,7 @@ fun EditTransactionScreen(
         ) {
 
             if (!isIncome) {
+
                 Button(
                     onClick = {
                         isIncome = false
@@ -75,7 +81,9 @@ fun EditTransactionScreen(
                 ) {
                     Text("Expense")
                 }
+
             } else {
+
                 OutlinedButton(
                     onClick = {
                         isIncome = false
@@ -87,6 +95,7 @@ fun EditTransactionScreen(
             }
 
             if (isIncome) {
+
                 Button(
                     onClick = {
                         isIncome = true
@@ -95,7 +104,9 @@ fun EditTransactionScreen(
                 ) {
                     Text("Income")
                 }
+
             } else {
+
                 OutlinedButton(
                     onClick = {
                         isIncome = true
@@ -134,17 +145,47 @@ fun EditTransactionScreen(
             )
         )
 
-        OutlinedTextField(
-            value = category,
-            onValueChange = {
-                category = it
-            },
-            label = {
-                Text("Category")
-            },
-            modifier = Modifier.fillMaxWidth(),
-            singleLine = true
-        )
+        // Category dropdown
+        Column(
+            modifier = Modifier.fillMaxWidth()
+        ) {
+
+            OutlinedButton(
+                onClick = {
+                    categoryExpanded = true
+                },
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Text(
+                    text = if (category.isEmpty()) {
+                        "Select Category"
+                    } else {
+                        category
+                    }
+                )
+            }
+
+            DropdownMenu(
+                expanded = categoryExpanded,
+                onDismissRequest = {
+                    categoryExpanded = false
+                }
+            ) {
+
+                expenseCategories.forEach { item ->
+
+                    DropdownMenuItem(
+                        text = {
+                            Text(item)
+                        },
+                        onClick = {
+                            category = item
+                            categoryExpanded = false
+                        }
+                    )
+                }
+            }
+        }
 
         OutlinedTextField(
             value = note,
@@ -172,7 +213,7 @@ fun EditTransactionScreen(
                     val updatedTransaction = transaction.copy(
                         title = title.trim(),
                         amount = amountValue,
-                        category = category.trim(),
+                        category = category,
                         type = if (isIncome) {
                             "INCOME"
                         } else {
