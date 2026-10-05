@@ -1,5 +1,12 @@
 package com.example.expensetracker.ui.screens
 
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.remember
+import com.patrykandpatrick.vico.compose.cartesian.CartesianChartHost
+import com.patrykandpatrick.vico.compose.cartesian.rememberCartesianChart
+import com.patrykandpatrick.vico.compose.cartesian.layer.rememberColumnCartesianLayer
+import com.patrykandpatrick.vico.core.cartesian.data.CartesianChartModelProducer
+import com.patrykandpatrick.vico.core.cartesian.data.columnSeries
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -28,7 +35,24 @@ fun AnalyticsScreen(
     val balance by viewModel.balance.collectAsStateWithLifecycle()
     val expensesByCategory by viewModel.expensesByCategory
         .collectAsStateWithLifecycle()
+    val chartModelProducer = remember {
+        CartesianChartModelProducer()
+    }
 
+    LaunchedEffect(expensesByCategory) {
+        if (expensesByCategory.isNotEmpty()) {
+            chartModelProducer.runTransaction {
+                columnSeries {
+                    series(
+                        expensesByCategory
+                            .toList()
+                            .sortedByDescending { it.second }
+                            .map { it.second }
+                    )
+                }
+            }
+        }
+    }
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -95,6 +119,23 @@ fun AnalyticsScreen(
         Spacer(
             modifier = Modifier.height(12.dp)
         )
+
+        if (expensesByCategory.isNotEmpty()) {
+
+            CartesianChartHost(
+                chart = rememberCartesianChart(
+                    rememberColumnCartesianLayer()
+                ),
+                modelProducer = chartModelProducer,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(250.dp)
+            )
+
+            Spacer(
+                modifier = Modifier.height(20.dp)
+            )
+        }
 
         if (expensesByCategory.isEmpty()) {
 
