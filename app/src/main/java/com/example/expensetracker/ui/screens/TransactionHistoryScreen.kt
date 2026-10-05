@@ -1,6 +1,8 @@
 package com.example.expensetracker.ui.screens
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -8,28 +10,52 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material.icons.filled.FilterList
+import androidx.compose.material.icons.filled.Search
+import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
+import androidx.compose.material3.Button
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.expensetracker.data.expenseCategories
 import com.example.expensetracker.data.local.ExpenseEntity
 import com.example.expensetracker.viewmodel.ExpenseViewModel
+
+private val IncomeGreen = Color(0xFF16A34A)
+private val IncomeGreenLight = Color(0xFFDCFCE7)
+
+private val ExpenseRed = Color(0xFFDC2626)
+private val ExpenseRedLight = Color(0xFFFEE2E2)
 
 @Composable
 fun TransactionHistoryScreen(
@@ -63,7 +89,6 @@ fun TransactionHistoryScreen(
         mutableStateOf(false)
     }
 
-    // Filter transactions
     val filteredTransactions = transactions.filter { transaction ->
 
         val query = searchQuery.trim()
@@ -95,85 +120,200 @@ fun TransactionHistoryScreen(
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .padding(20.dp)
+            .background(MaterialTheme.colorScheme.background)
+            .padding(horizontal = 20.dp)
     ) {
-
-        // Back button
-        TextButton(
-            onClick = onBack
-        ) {
-            Text("← Back")
-        }
-
-        Text(
-            text = "All Transactions",
-            style = MaterialTheme.typography.headlineMedium
-        )
 
         Spacer(
             modifier = Modifier.height(16.dp)
         )
 
-        // Search
+        // Header
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+
+            IconButton(
+                onClick = onBack
+            ) {
+                Icon(
+                    imageVector = Icons.Default.ArrowBack,
+                    contentDescription = "Back"
+                )
+            }
+
+            Spacer(
+                modifier = Modifier.width(4.dp)
+            )
+
+            Column {
+                Text(
+                    text = "Transactions",
+                    style = MaterialTheme.typography.headlineMedium,
+                    fontWeight = FontWeight.Bold
+                )
+
+                Text(
+                    text = "${transactions.size} transactions",
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
+        }
+
+        Spacer(
+            modifier = Modifier.height(20.dp)
+        )
+
+        // Search bar
         OutlinedTextField(
             value = searchQuery,
             onValueChange = {
                 searchQuery = it
             },
-            label = {
-                Text("Search transactions")
+            modifier = Modifier.fillMaxWidth(),
+            singleLine = true,
+            leadingIcon = {
+                Icon(
+                    imageVector = Icons.Default.Search,
+                    contentDescription = "Search"
+                )
             },
             placeholder = {
-                Text("Search by title or category")
+                Text("Search transactions")
             },
-            modifier = Modifier.fillMaxWidth(),
-            singleLine = true
+            shape = RoundedCornerShape(16.dp)
         )
 
         Spacer(
             modifier = Modifier.height(12.dp)
         )
 
-        // Category filter
-        Column(
-            modifier = Modifier.fillMaxWidth()
+        // Filters
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(10.dp)
         ) {
 
-            OutlinedButton(
-                onClick = {
-                    categoryExpanded = true
-                },
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                Text(selectedCategory)
-            }
-
-            DropdownMenu(
-                expanded = categoryExpanded,
-                onDismissRequest = {
-                    categoryExpanded = false
-                }
+            Box(
+                modifier = Modifier.weight(1f)
             ) {
 
-                DropdownMenuItem(
-                    text = {
-                        Text("All Categories")
-                    },
+                Button(
                     onClick = {
-                        selectedCategory = "All Categories"
+                        categoryExpanded = true
+                    },
+                    modifier = Modifier.fillMaxWidth(),
+                    shape = RoundedCornerShape(14.dp)
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.FilterList,
+                        contentDescription = null,
+                        modifier = Modifier.size(18.dp)
+                    )
+
+                    Spacer(
+                        modifier = Modifier.width(6.dp)
+                    )
+
+                    Text(
+                        text = when {
+                            selectedCategory == "All Categories" ->
+                                "Category"
+
+                            else ->
+                                selectedCategory
+                        }
+                    )
+                }
+
+                DropdownMenu(
+                    expanded = categoryExpanded,
+                    onDismissRequest = {
                         categoryExpanded = false
                     }
-                )
-
-                expenseCategories.forEach { category ->
+                ) {
 
                     DropdownMenuItem(
                         text = {
-                            Text(category)
+                            Text("All Categories")
                         },
                         onClick = {
-                            selectedCategory = category
+                            selectedCategory = "All Categories"
                             categoryExpanded = false
+                        }
+                    )
+
+                    expenseCategories.forEach { category ->
+
+                        DropdownMenuItem(
+                            text = {
+                                Text(category)
+                            },
+                            onClick = {
+                                selectedCategory = category
+                                categoryExpanded = false
+                            }
+                        )
+                    }
+                }
+            }
+
+            Box(
+                modifier = Modifier.weight(1f)
+            ) {
+
+                Button(
+                    onClick = {
+                        typeExpanded = true
+                    },
+                    modifier = Modifier.fillMaxWidth(),
+                    shape = RoundedCornerShape(14.dp)
+                ) {
+                    Text(
+                        text = when (selectedType) {
+                            "INCOME" -> "Income"
+                            "EXPENSE" -> "Expense"
+                            else -> "All Types"
+                        }
+                    )
+                }
+
+                DropdownMenu(
+                    expanded = typeExpanded,
+                    onDismissRequest = {
+                        typeExpanded = false
+                    }
+                ) {
+
+                    DropdownMenuItem(
+                        text = {
+                            Text("All Types")
+                        },
+                        onClick = {
+                            selectedType = "ALL"
+                            typeExpanded = false
+                        }
+                    )
+
+                    DropdownMenuItem(
+                        text = {
+                            Text("Income")
+                        },
+                        onClick = {
+                            selectedType = "INCOME"
+                            typeExpanded = false
+                        }
+                    )
+
+                    DropdownMenuItem(
+                        text = {
+                            Text("Expense")
+                        },
+                        onClick = {
+                            selectedType = "EXPENSE"
+                            typeExpanded = false
                         }
                     )
                 }
@@ -181,88 +321,44 @@ fun TransactionHistoryScreen(
         }
 
         Spacer(
-            modifier = Modifier.height(12.dp)
+            modifier = Modifier.height(20.dp)
         )
 
-        // Income / Expense filter
-        Column(
-            modifier = Modifier.fillMaxWidth()
+        // Transaction count
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
         ) {
 
-            OutlinedButton(
-                onClick = {
-                    typeExpanded = true
-                },
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                Text(
-                    when (selectedType) {
-                        "INCOME" -> "Income"
-                        "EXPENSE" -> "Expense"
-                        else -> "All Types"
-                    }
-                )
-            }
+            Text(
+                text = "Recent Transactions",
+                style = MaterialTheme.typography.titleLarge,
+                fontWeight = FontWeight.Bold
+            )
 
-            DropdownMenu(
-                expanded = typeExpanded,
-                onDismissRequest = {
-                    typeExpanded = false
-                }
-            ) {
-
-                DropdownMenuItem(
-                    text = {
-                        Text("All Types")
-                    },
-                    onClick = {
-                        selectedType = "ALL"
-                        typeExpanded = false
-                    }
-                )
-
-                DropdownMenuItem(
-                    text = {
-                        Text("Income")
-                    },
-                    onClick = {
-                        selectedType = "INCOME"
-                        typeExpanded = false
-                    }
-                )
-
-                DropdownMenuItem(
-                    text = {
-                        Text("Expense")
-                    },
-                    onClick = {
-                        selectedType = "EXPENSE"
-                        typeExpanded = false
-                    }
-                )
-            }
+            Text(
+                text = "${filteredTransactions.size} found",
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
         }
 
         Spacer(
-            modifier = Modifier.height(16.dp)
+            modifier = Modifier.height(12.dp)
         )
 
-        // Transaction list
         if (filteredTransactions.isEmpty()) {
 
-            Text(
-                text = if (transactions.isEmpty()) {
-                    "No transactions yet"
-                } else {
-                    "No matching transactions"
-                },
-                style = MaterialTheme.typography.bodyLarge
+            EmptyTransactionState(
+                hasTransactions = transactions.isNotEmpty()
             )
 
         } else {
 
             LazyColumn(
-                verticalArrangement = Arrangement.spacedBy(10.dp)
+                modifier = Modifier.fillMaxSize(),
+                verticalArrangement = Arrangement.spacedBy(12.dp)
             ) {
 
                 items(
@@ -272,14 +368,18 @@ fun TransactionHistoryScreen(
 
                     TransactionHistoryItem(
                         transaction = transaction,
-
                         onEdit = {
                             onEdit(transaction.id)
                         },
-
                         onDelete = {
                             transactionToDelete = transaction
                         }
+                    )
+                }
+
+                item {
+                    Spacer(
+                        modifier = Modifier.height(20.dp)
                     )
                 }
             }
@@ -293,18 +393,18 @@ fun TransactionHistoryScreen(
             onDismissRequest = {
                 transactionToDelete = null
             },
-
             title = {
-                Text("Delete Transaction?")
+                Text(
+                    text = "Delete Transaction?",
+                    fontWeight = FontWeight.Bold
+                )
             },
-
             text = {
                 Text(
                     "Are you sure you want to delete " +
                             "\"${transactionToDelete?.title}\"?"
                 )
             },
-
             confirmButton = {
 
                 TextButton(
@@ -317,10 +417,12 @@ fun TransactionHistoryScreen(
                         transactionToDelete = null
                     }
                 ) {
-                    Text("Delete")
+                    Text(
+                        text = "Delete",
+                        color = ExpenseRed
+                    )
                 }
             },
-
             dismissButton = {
 
                 TextButton(
@@ -341,57 +443,190 @@ private fun TransactionHistoryItem(
     onEdit: () -> Unit,
     onDelete: () -> Unit
 ) {
+    val isIncome = transaction.type == "INCOME"
+
+    val accentColor =
+        if (isIncome) IncomeGreen else ExpenseRed
+
+    val iconBackground =
+        if (isIncome) IncomeGreenLight else ExpenseRedLight
+
     Card(
-        modifier = Modifier.fillMaxWidth()
+        modifier = Modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(20.dp),
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.surface
+        ),
+        elevation = CardDefaults.cardElevation(
+            defaultElevation = 2.dp
+        )
     ) {
 
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(16.dp),
-            horizontalArrangement = Arrangement.SpaceBetween
+        Column(
+            modifier = Modifier.padding(16.dp)
         ) {
 
-            Column {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
 
-                Text(
-                    text = transaction.title,
-                    style = MaterialTheme.typography.titleMedium
-                )
+                // Transaction icon
+                Box(
+                    modifier = Modifier
+                        .size(48.dp)
+                        .clip(CircleShape)
+                        .background(iconBackground),
+                    contentAlignment = Alignment.Center
+                ) {
+
+                    Text(
+                        text = if (isIncome) "↑" else "↓",
+                        color = accentColor,
+                        style = MaterialTheme.typography.titleLarge,
+                        fontWeight = FontWeight.Bold
+                    )
+                }
 
                 Spacer(
-                    modifier = Modifier.height(4.dp)
+                    modifier = Modifier.width(14.dp)
                 )
 
-                Text(
-                    text = transaction.category,
-                    style = MaterialTheme.typography.bodyMedium
-                )
-            }
+                // Transaction information
+                Column(
+                    modifier = Modifier.weight(1f)
+                ) {
 
-            Column {
+                    Text(
+                        text = transaction.title,
+                        style = MaterialTheme.typography.titleMedium,
+                        fontWeight = FontWeight.SemiBold
+                    )
 
+                    Spacer(
+                        modifier = Modifier.height(3.dp)
+                    )
+
+                    Text(
+                        text = transaction.category,
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
+
+                // Amount
                 Text(
-                    text = if (transaction.type == "INCOME") {
+                    text = if (isIncome) {
                         "+₹${transaction.amount}"
                     } else {
                         "-₹${transaction.amount}"
                     },
-                    style = MaterialTheme.typography.titleMedium
+                    color = accentColor,
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.Bold
                 )
+            }
 
-                TextButton(
+            Spacer(
+                modifier = Modifier.height(12.dp)
+            )
+
+            HorizontalDivider()
+
+            Spacer(
+                modifier = Modifier.height(4.dp)
+            )
+
+            // Actions
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.End
+            ) {
+
+                IconButton(
                     onClick = onEdit
                 ) {
-                    Text("Edit")
+                    Icon(
+                        imageVector = Icons.Default.Edit,
+                        contentDescription = "Edit transaction",
+                        tint = MaterialTheme.colorScheme.primary
+                    )
                 }
 
-                TextButton(
+                IconButton(
                     onClick = onDelete
                 ) {
-                    Text("Delete")
+                    Icon(
+                        imageVector = Icons.Default.Delete,
+                        contentDescription = "Delete transaction",
+                        tint = ExpenseRed
+                    )
                 }
             }
+        }
+    }
+}
+
+@Composable
+private fun EmptyTransactionState(
+    hasTransactions: Boolean
+) {
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(top = 60.dp),
+        contentAlignment = Alignment.Center
+    ) {
+
+        Column(
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+
+            Box(
+                modifier = Modifier
+                    .size(72.dp)
+                    .clip(CircleShape)
+                    .background(
+                        MaterialTheme.colorScheme.surfaceVariant
+                    ),
+                contentAlignment = Alignment.Center
+            ) {
+
+                Text(
+                    text = "₹",
+                    style = MaterialTheme.typography.headlineMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    fontWeight = FontWeight.Bold
+                )
+            }
+
+            Spacer(
+                modifier = Modifier.height(16.dp)
+            )
+
+            Text(
+                text = if (hasTransactions) {
+                    "No matching transactions"
+                } else {
+                    "No transactions yet"
+                },
+                style = MaterialTheme.typography.titleMedium,
+                fontWeight = FontWeight.SemiBold
+            )
+
+            Spacer(
+                modifier = Modifier.height(6.dp)
+            )
+
+            Text(
+                text = if (hasTransactions) {
+                    "Try changing your search or filters."
+                } else {
+                    "Your transactions will appear here."
+                },
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
         }
     }
 }
