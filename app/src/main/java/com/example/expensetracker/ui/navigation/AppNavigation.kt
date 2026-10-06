@@ -1,5 +1,6 @@
 package com.example.expensetracker.ui.navigation
 
+import com.example.expensetracker.ui.screens.EditBudgetScreen
 import com.example.expensetracker.ui.screens.AddBudgetScreen
 import com.example.expensetracker.ui.screens.BudgetScreen
 import androidx.compose.runtime.Composable
@@ -66,8 +67,45 @@ fun AppNavigation(
                 },
                 onAddBudget = {
                     navController.navigate("add_budget")
+                },
+                onEditBudget = { budgetId ->
+                    navController.navigate("edit_budget/$budgetId")
                 }
             )
+        }
+
+        composable(
+            route = "edit_budget/{budgetId}",
+            arguments = listOf(
+                navArgument("budgetId") {
+                    type = NavType.LongType
+                }
+            )
+        ) { backStackEntry ->
+
+            val budgetId =
+                backStackEntry.arguments?.getLong("budgetId")
+
+            val budgets by budgetViewModel.budgets
+                .collectAsStateWithLifecycle()
+
+            val budget = budgets.find {
+                it.id == budgetId
+            }
+
+            if (budget != null) {
+
+                EditBudgetScreen(
+                    budget = budget,
+                    budgetViewModel = budgetViewModel,
+                    onBudgetUpdated = {
+                        navController.popBackStack()
+                    },
+                    onBack = {
+                        navController.popBackStack()
+                    }
+                )
+            }
         }
 
         composable("add_budget") {
