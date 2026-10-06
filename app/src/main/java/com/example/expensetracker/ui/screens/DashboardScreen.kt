@@ -48,8 +48,9 @@ fun DashboardScreen(
     viewModel: ExpenseViewModel,
     onAddTransaction: () -> Unit,
     onViewAllTransactions: () -> Unit,
-    onViewAnalytics: () -> Unit
-) {
+    onViewAnalytics: () -> Unit,
+    onViewBudgets: () -> Unit
+){
     val balance by viewModel.balance.collectAsStateWithLifecycle()
     val income by viewModel.totalIncome.collectAsStateWithLifecycle()
     val expenses by viewModel.totalExpenses.collectAsStateWithLifecycle()
@@ -197,6 +198,14 @@ fun DashboardScreen(
             Spacer(modifier = Modifier.width(6.dp))
 
             Text("View Analytics")
+        }
+
+        TextButton(
+            onClick = onViewBudgets,
+            modifier = Modifier.fillMaxWidth()
+        ) {
+
+            Text("View Budgets")
         }
 
         Spacer(modifier = Modifier.height(12.dp))

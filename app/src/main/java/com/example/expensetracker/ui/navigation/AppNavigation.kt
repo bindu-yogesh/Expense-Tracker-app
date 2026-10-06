@@ -1,5 +1,7 @@
 package com.example.expensetracker.ui.navigation
 
+import com.example.expensetracker.ui.screens.AddBudgetScreen
+import com.example.expensetracker.ui.screens.BudgetScreen
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -13,12 +15,15 @@ import com.example.expensetracker.ui.screens.AnalyticsScreen
 import com.example.expensetracker.ui.screens.DashboardScreen
 import com.example.expensetracker.ui.screens.EditTransactionScreen
 import com.example.expensetracker.ui.screens.TransactionHistoryScreen
+import com.example.expensetracker.viewmodel.BudgetViewModel
 import com.example.expensetracker.viewmodel.ExpenseViewModel
 
 @Composable
 fun AppNavigation(
-    viewModel: ExpenseViewModel
+    viewModel: ExpenseViewModel,
+    budgetViewModel: BudgetViewModel
 ) {
+
     val navController = rememberNavController()
 
     NavHost(
@@ -26,59 +31,72 @@ fun AppNavigation(
         startDestination = "dashboard"
     ) {
 
-        // Dashboard
-        composable("dashboard") {
-
-            DashboardScreen(
-                viewModel = viewModel,
-
-                onAddTransaction = {
-                    navController.navigate("add_transaction")
-                },
-
-                onViewAllTransactions = {
-                    navController.navigate("transaction_history")
-                },
-                onViewAnalytics = {
-                    navController.navigate("analytics")
-                }
-            )
+        composable("dashboard") {DashboardScreen(
+            viewModel = viewModel,
+            onAddTransaction = {
+                navController.navigate("add_transaction")
+            },
+            onViewAllTransactions = {
+                navController.navigate("transaction_history")
+            },
+            onViewAnalytics = {
+                navController.navigate("analytics")
+            },
+            onViewBudgets = {
+                navController.navigate("budget")
+            }
+        )
         }
 
-        // Analytics
         composable("analytics") {
-
             AnalyticsScreen(
                 viewModel = viewModel,
-
                 onBack = {
                     navController.popBackStack()
                 }
             )
         }
 
-        // Add Transaction
-        composable("add_transaction") {
+        composable("budget") {
+            BudgetScreen(
+                budgetViewModel = budgetViewModel,
+                expenseViewModel = viewModel,
+                onBack = {
+                    navController.popBackStack()
+                },
+                onAddBudget = {
+                    navController.navigate("add_budget")
+                }
+            )
+        }
 
+        composable("add_budget") {
+            AddBudgetScreen(
+                budgetViewModel = budgetViewModel,
+                onBudgetSaved = {
+                    navController.popBackStack()
+                },
+                onBack = {
+                    navController.popBackStack()
+                }
+            )
+        }
+
+        composable("add_transaction") {
             AddExpenseScreen(
                 viewModel = viewModel,
-
                 onTransactionSaved = {
                     navController.popBackStack()
                 }
             )
         }
 
-        // Transaction History
         composable("transaction_history") {
-
             TransactionHistoryScreen(
                 viewModel = viewModel,
-
                 onBack = {
                     navController.popBackStack()
                 },
-
                 onEdit = { transactionId ->
                     navController.navigate(
                         "edit_transaction/$transactionId"
@@ -87,10 +105,8 @@ fun AppNavigation(
             )
         }
 
-        // Edit Transaction
         composable(
             route = "edit_transaction/{transactionId}",
-
             arguments = listOf(
                 navArgument("transactionId") {
                     type = NavType.LongType
@@ -109,15 +125,12 @@ fun AppNavigation(
             }
 
             if (transaction != null) {
-
                 EditTransactionScreen(
                     transaction = transaction,
                     viewModel = viewModel,
-
                     onTransactionUpdated = {
                         navController.popBackStack()
                     },
-
                     onBack = {
                         navController.popBackStack()
                     }
