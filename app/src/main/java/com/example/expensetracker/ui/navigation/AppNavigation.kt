@@ -89,7 +89,7 @@ fun AppNavigation(
             val budgets by budgetViewModel.budgets
                 .collectAsStateWithLifecycle()
 
-            val budget = budgets.find {
+            val budget = budgets.orEmpty().find {
                 it.id == budgetId
             }
 

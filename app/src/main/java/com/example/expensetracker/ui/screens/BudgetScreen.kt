@@ -1,6 +1,6 @@
-package com.example.expensetracker.ui.screens
 
-import androidx.compose.material3.ExperimentalMaterial3Api
+package com.example.expensetracker.ui.screens
+//import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -28,6 +28,7 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -37,30 +38,34 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.expensetracker.data.local.BudgetEntity
 import com.example.expensetracker.ui.theme.ExpenseRed
-import com.example.expensetracker.ui.theme.ExpenseRedLight
 import com.example.expensetracker.ui.theme.IncomeGreen
-import com.example.expensetracker.ui.theme.IncomeGreenLight
 import com.example.expensetracker.ui.theme.PrimaryBlue
 import com.example.expensetracker.ui.theme.PrimaryBlueLight
 import com.example.expensetracker.ui.theme.Teal
-import com.example.expensetracker.ui.theme.TealLight
 import com.example.expensetracker.viewmodel.BudgetViewModel
 import com.example.expensetracker.viewmodel.ExpenseViewModel
 import java.util.Calendar
 import kotlin.math.abs
+
+private val ScreenBackground = Color(0xFFF8FAFC)
+private val CardBackground = Color.White
+private val MainText = Color(0xFF0F172A)
+private val SecondaryText = Color(0xFF475569)
+private val ProgressTrack = Color(0xFFE2E8F0)
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -77,9 +82,11 @@ fun BudgetScreen(
     val currentMonth = calendar.get(Calendar.MONTH) + 1
     val currentYear = calendar.get(Calendar.YEAR)
 
-    val monthlyBudgets by budgetViewModel
+    val monthlyBudgetsState by budgetViewModel
         .getBudgetsForMonth(currentMonth, currentYear)
         .collectAsState()
+
+    val monthlyBudgets = monthlyBudgetsState.orEmpty()
 
     var budgetToDelete by remember {
         mutableStateOf<BudgetEntity?>(null)
@@ -106,17 +113,20 @@ fun BudgetScreen(
     val totalRemaining = totalBudget - totalSpent
 
     Scaffold(
+        containerColor = ScreenBackground,
         topBar = {
             TopAppBar(
                 title = {
                     Column {
                         Text(
                             text = "Budgets",
-                            fontWeight = FontWeight.Bold
+                            fontWeight = FontWeight.Bold,
+                            color = MainText
                         )
                         Text(
                             text = "Monthly spending limits",
-                            fontSize = 12.sp
+                            fontSize = 12.sp,
+                            color = SecondaryText
                         )
                     }
                 },
@@ -124,12 +134,15 @@ fun BudgetScreen(
                     IconButton(onClick = onBack) {
                         Icon(
                             imageVector = Icons.Default.ArrowBack,
-                            contentDescription = "Back"
+                            contentDescription = "Back",
+                            tint = MainText
                         )
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = PrimaryBlueLight
+                    containerColor = ScreenBackground,
+                    titleContentColor = MainText,
+                    navigationIconContentColor = MainText
                 )
             )
         },
@@ -137,7 +150,7 @@ fun BudgetScreen(
             FloatingActionButton(
                 onClick = onAddBudget,
                 containerColor = PrimaryBlue,
-                contentColor = androidx.compose.ui.graphics.Color.White
+                contentColor = Color.White
             ) {
                 Icon(
                     imageVector = Icons.Default.Add,
@@ -146,15 +159,19 @@ fun BudgetScreen(
             }
         }
     ) { paddingValues ->
-
         LazyColumn(
             modifier = Modifier
                 .fillMaxSize()
+                .background(ScreenBackground)
                 .padding(paddingValues),
-            contentPadding = PaddingValues(16.dp),
+            contentPadding = PaddingValues(
+                start = 16.dp,
+                top = 16.dp,
+                end = 16.dp,
+                bottom = 96.dp
+            ),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-
             item {
                 BudgetOverviewCard(
                     totalBudget = totalBudget,
@@ -163,18 +180,19 @@ fun BudgetScreen(
                 )
             }
 
-            if (monthlyBudgets.isEmpty()) {
+            if (monthlyBudgetsState == null) {
+                // Loading: don't show the empty-budget message yet.
+            } else if (monthlyBudgets.isEmpty()) {
                 item {
-                    EmptyBudgetCard(
-                        onAddBudget = onAddBudget
-                    )
+                    EmptyBudgetCard(onAddBudget = onAddBudget)
                 }
             } else {
                 item {
                     Text(
                         text = "Category Budgets",
                         fontSize = 20.sp,
-                        fontWeight = FontWeight.Bold
+                        fontWeight = FontWeight.Bold,
+                        color = MainText
                     )
                 }
 
@@ -182,7 +200,6 @@ fun BudgetScreen(
                     items = monthlyBudgets,
                     key = { it.id }
                 ) { budget ->
-
                     val spent = monthlyExpenses
                         .filter { it.category == budget.category }
                         .sumOf { it.amount }
@@ -190,28 +207,20 @@ fun BudgetScreen(
                     BudgetCard(
                         budget = budget,
                         spentAmount = spent,
-                        onEdit = {
-                            onEditBudget(budget.id)
-                        },
-                        onDelete = {
-                            budgetToDelete = budget
-                        }
+                        onEdit = { onEditBudget(budget.id) },
+                        onDelete = { budgetToDelete = budget }
                     )
                 }
-            }
-
-            item {
-                Spacer(modifier = Modifier.height(70.dp))
             }
         }
     }
 
     budgetToDelete?.let { budget ->
-
         AlertDialog(
-            onDismissRequest = {
-                budgetToDelete = null
-            },
+            onDismissRequest = { budgetToDelete = null },
+            containerColor = CardBackground,
+            titleContentColor = MainText,
+            textContentColor = SecondaryText,
             title = {
                 Text(
                     text = "Delete Budget?",
@@ -220,7 +229,7 @@ fun BudgetScreen(
             },
             text = {
                 Text(
-                    "Are you sure you want to delete the ${budget.category} budget?"
+                    text = "Are you sure you want to delete the ${budget.category} budget?"
                 )
             },
             confirmButton = {
@@ -230,7 +239,8 @@ fun BudgetScreen(
                         budgetToDelete = null
                     },
                     colors = ButtonDefaults.buttonColors(
-                        containerColor = ExpenseRed
+                        containerColor = ExpenseRed,
+                        contentColor = Color.White
                     )
                 ) {
                     Text("Delete")
@@ -238,9 +248,11 @@ fun BudgetScreen(
             },
             dismissButton = {
                 Button(
-                    onClick = {
-                        budgetToDelete = null
-                    }
+                    onClick = { budgetToDelete = null },
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = ProgressTrack,
+                        contentColor = MainText
+                    )
                 ) {
                     Text("Cancel")
                 }
@@ -255,14 +267,13 @@ private fun BudgetOverviewCard(
     totalSpent: Long,
     remaining: Long
 ) {
-    val overallProgress =
-        if (totalBudget > 0) {
-            (totalSpent.toFloat() / totalBudget.toFloat()).coerceIn(0f, 1f)
-        } else {
-            0f
-        }
+    val overallProgress = if (totalBudget > 0L) {
+        (totalSpent.toFloat() / totalBudget.toFloat()).coerceIn(0f, 1f)
+    } else {
+        0f
+    }
 
-    val isOverBudget = remaining < 0
+    val isOverBudget = remaining < 0L
 
     Card(
         modifier = Modifier.fillMaxWidth(),
@@ -270,17 +281,12 @@ private fun BudgetOverviewCard(
         colors = CardDefaults.cardColors(
             containerColor = PrimaryBlue
         ),
-        elevation = CardDefaults.cardElevation(
-            defaultElevation = 4.dp
-        )
+        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
     ) {
-        Column(
-            modifier = Modifier.padding(20.dp)
-        ) {
-
+        Column(modifier = Modifier.padding(20.dp)) {
             Text(
                 text = "This Month",
-                color = androidx.compose.ui.graphics.Color.White.copy(alpha = 0.8f),
+                color = Color.White.copy(alpha = 0.85f),
                 fontSize = 14.sp
             )
 
@@ -288,7 +294,7 @@ private fun BudgetOverviewCard(
 
             Text(
                 text = "₹$totalSpent spent",
-                color = androidx.compose.ui.graphics.Color.White,
+                color = Color.White,
                 fontSize = 28.sp,
                 fontWeight = FontWeight.Bold
             )
@@ -301,8 +307,8 @@ private fun BudgetOverviewCard(
                     .fillMaxWidth()
                     .height(8.dp)
                     .clip(CircleShape),
-                color = androidx.compose.ui.graphics.Color.White,
-                trackColor = androidx.compose.ui.graphics.Color.White.copy(alpha = 0.25f)
+                color = Color.White,
+                trackColor = Color.White.copy(alpha = 0.25f)
             )
 
             Spacer(modifier = Modifier.height(18.dp))
@@ -318,7 +324,8 @@ private fun BudgetOverviewCard(
 
                 OverviewItem(
                     title = if (isOverBudget) "Over Budget" else "Remaining",
-                    value = "₹${abs(remaining)}"
+                    value = "₹${abs(remaining)}",
+                    alignment = Alignment.End
                 )
             }
         }
@@ -328,18 +335,19 @@ private fun BudgetOverviewCard(
 @Composable
 private fun OverviewItem(
     title: String,
-    value: String
+    value: String,
+    alignment: Alignment.Horizontal = Alignment.Start
 ) {
-    Column {
+    Column(horizontalAlignment = alignment) {
         Text(
             text = title,
-            color = androidx.compose.ui.graphics.Color.White.copy(alpha = 0.75f),
+            color = Color.White.copy(alpha = 0.85f),
             fontSize = 13.sp
         )
 
         Text(
             text = value,
-            color = androidx.compose.ui.graphics.Color.White,
+            color = Color.White,
             fontSize = 18.sp,
             fontWeight = FontWeight.Bold
         )
@@ -355,12 +363,11 @@ private fun BudgetCard(
 ) {
     val remaining = budget.amount - spentAmount
 
-    val progress =
-        if (budget.amount > 0) {
-            spentAmount.toFloat() / budget.amount.toFloat()
-        } else {
-            0f
-        }
+    val progress = if (budget.amount > 0L) {
+        spentAmount.toFloat() / budget.amount.toFloat()
+    } else {
+        0f
+    }
 
     val isOverBudget = spentAmount > budget.amount
     val isNearLimit = !isOverBudget && progress >= 0.8f
@@ -371,31 +378,25 @@ private fun BudgetCard(
         else -> IncomeGreen
     }
 
-    val lightAccentColor = when {
-        isOverBudget -> ExpenseRedLight
-        isNearLimit -> TealLight
-        else -> IncomeGreenLight
+    val statusText = when {
+        isOverBudget -> "Budget exceeded"
+        isNearLimit -> "Almost at limit"
+        else -> "Within budget"
     }
 
     Card(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(22.dp),
         colors = CardDefaults.cardColors(
-            containerColor = lightAccentColor
+            containerColor = CardBackground
         ),
-        elevation = CardDefaults.cardElevation(
-            defaultElevation = 2.dp
-        )
+        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
     ) {
-        Column(
-            modifier = Modifier.padding(18.dp)
-        ) {
-
+        Column(modifier = Modifier.padding(18.dp)) {
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 verticalAlignment = Alignment.CenterVertically
             ) {
-
                 Box(
                     modifier = Modifier
                         .size(46.dp)
@@ -404,8 +405,8 @@ private fun BudgetCard(
                     contentAlignment = Alignment.Center
                 ) {
                     Text(
-                        text = budget.category.take(1),
-                        color = androidx.compose.ui.graphics.Color.White,
+                        text = budget.category.take(1).uppercase(),
+                        color = Color.White,
                         fontWeight = FontWeight.Bold,
                         fontSize = 20.sp
                     )
@@ -413,23 +414,16 @@ private fun BudgetCard(
 
                 Spacer(modifier = Modifier.size(12.dp))
 
-                Column(
-                    modifier = Modifier.weight(1f)
-                ) {
+                Column(modifier = Modifier.weight(1f)) {
                     Text(
                         text = budget.category,
                         fontSize = 17.sp,
-                        fontWeight = FontWeight.Bold
+                        fontWeight = FontWeight.Bold,
+                        color = MainText
                     )
 
                     Text(
-                        text = if (isOverBudget) {
-                            "Budget exceeded"
-                        } else if (isNearLimit) {
-                            "Almost at limit"
-                        } else {
-                            "Within budget"
-                        },
+                        text = statusText,
                         color = accentColor,
                         fontSize = 12.sp,
                         fontWeight = FontWeight.SemiBold
@@ -440,7 +434,7 @@ private fun BudgetCard(
                     Icon(
                         imageVector = Icons.Default.Edit,
                         contentDescription = "Edit Budget",
-                        tint = accentColor
+                        tint = PrimaryBlue
                     )
                 }
 
@@ -462,22 +456,23 @@ private fun BudgetCard(
                 Column {
                     Text(
                         text = "Spent",
-                        fontSize = 12.sp
+                        fontSize = 12.sp,
+                        color = SecondaryText
                     )
 
                     Text(
                         text = "₹$spentAmount",
                         fontSize = 18.sp,
-                        fontWeight = FontWeight.Bold
+                        fontWeight = FontWeight.Bold,
+                        color = MainText
                     )
                 }
 
-                Column(
-                    horizontalAlignment = Alignment.End
-                ) {
+                Column(horizontalAlignment = Alignment.End) {
                     Text(
                         text = if (isOverBudget) "Over by" else "Remaining",
-                        fontSize = 12.sp
+                        fontSize = 12.sp,
+                        color = SecondaryText
                     )
 
                     Text(
@@ -498,14 +493,15 @@ private fun BudgetCard(
                     .height(9.dp)
                     .clip(CircleShape),
                 color = accentColor,
-                trackColor = androidx.compose.ui.graphics.Color.White.copy(alpha = 0.7f)
+                trackColor = ProgressTrack
             )
 
             Spacer(modifier = Modifier.height(8.dp))
 
             Text(
                 text = "Budget: ₹${budget.amount}",
-                fontSize = 12.sp
+                fontSize = 12.sp,
+                color = SecondaryText
             )
         }
     }
@@ -519,8 +515,9 @@ private fun EmptyBudgetCard(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(24.dp),
         colors = CardDefaults.cardColors(
-            containerColor = PrimaryBlueLight
-        )
+            containerColor = CardBackground
+        ),
+        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
     ) {
         Column(
             modifier = Modifier
@@ -528,7 +525,6 @@ private fun EmptyBudgetCard(
                 .padding(28.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-
             Box(
                 modifier = Modifier
                     .size(64.dp)
@@ -539,7 +535,7 @@ private fun EmptyBudgetCard(
                 Icon(
                     imageVector = Icons.Default.Warning,
                     contentDescription = null,
-                    tint = androidx.compose.ui.graphics.Color.White,
+                    tint = Color.White,
                     modifier = Modifier.size(32.dp)
                 )
             }
@@ -549,14 +545,16 @@ private fun EmptyBudgetCard(
             Text(
                 text = "No budgets yet",
                 fontSize = 20.sp,
-                fontWeight = FontWeight.Bold
+                fontWeight = FontWeight.Bold,
+                color = MainText
             )
 
             Spacer(modifier = Modifier.height(6.dp))
 
             Text(
                 text = "Set spending limits for your categories and keep your expenses under control.",
-                fontSize = 14.sp
+                fontSize = 14.sp,
+                color = SecondaryText
             )
 
             Spacer(modifier = Modifier.height(18.dp))
@@ -564,7 +562,8 @@ private fun EmptyBudgetCard(
             Button(
                 onClick = onAddBudget,
                 colors = ButtonDefaults.buttonColors(
-                    containerColor = PrimaryBlue
+                    containerColor = PrimaryBlue,
+                    contentColor = Color.White
                 )
             ) {
                 Icon(

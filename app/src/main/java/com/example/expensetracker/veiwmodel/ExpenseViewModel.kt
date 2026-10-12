@@ -22,6 +22,20 @@ class ExpenseViewModel(
                 initialValue = emptyList()
             )
 
+    init {
+        viewModelScope.launch {
+            expenses.collect { list ->
+                println("----- ALL TRANSACTIONS -----")
+                list.forEach {
+                    println(
+                        "ID=${it.id}, title=${it.title}, " +
+                                "amount=${it.amount}, type=${it.type}"
+                    )
+                }
+            }
+        }
+    }
+
     val totalIncome: StateFlow<Long> =
         expenses
             .map { list ->

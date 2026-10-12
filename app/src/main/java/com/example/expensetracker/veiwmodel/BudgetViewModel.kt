@@ -1,6 +1,6 @@
-
 package com.example.expensetracker.viewmodel
 
+import kotlinx.coroutines.flow.MutableStateFlow
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.expensetracker.data.local.BudgetEntity
@@ -14,11 +14,11 @@ class BudgetViewModel(
     private val repository: BudgetRepository
 ) : ViewModel() {
 
-    val budgets: StateFlow<List<BudgetEntity>> =
+    val budgets: StateFlow<List<BudgetEntity>?> =
         repository.allBudgets.stateIn(
             scope = viewModelScope,
             started = SharingStarted.WhileSubscribed(5000),
-            initialValue = emptyList()
+            initialValue = null
         )
 
     /**
@@ -54,16 +54,20 @@ class BudgetViewModel(
         }
     }
 
+    private val monthlyBudgetFlows =
+        mutableMapOf<Pair<Int, Int>, StateFlow<List<BudgetEntity>?>>()
     fun getBudgetsForMonth(
         month: Int,
         year: Int
-    ): StateFlow<List<BudgetEntity>> {
-        return repository
-            .getBudgetsForMonth(month, year)
-            .stateIn(
-                scope = viewModelScope,
-                started = SharingStarted.WhileSubscribed(5000),
-                initialValue = emptyList()
-            )
+    ): StateFlow<List<BudgetEntity>?> {
+        return monthlyBudgetFlows.getOrPut(month to year) {
+            repository
+                .getBudgetsForMonth(month, year)
+                .stateIn(
+                    scope = viewModelScope,
+                    started = SharingStarted.Eagerly,
+                    initialValue = null
+                )
+        }
     }
 }

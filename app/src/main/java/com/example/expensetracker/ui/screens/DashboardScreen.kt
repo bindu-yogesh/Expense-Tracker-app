@@ -1,6 +1,8 @@
 
 package com.example.expensetracker.ui.screens
 
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -69,6 +71,7 @@ fun DashboardScreen(
             .fillMaxSize()
             .background(DashboardBackground)
             .statusBarsPadding()
+            .verticalScroll(rememberScrollState())
             .padding(horizontal = 20.dp)
     ) {
         Spacer(modifier = Modifier.height(20.dp))
