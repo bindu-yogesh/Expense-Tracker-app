@@ -1,7 +1,6 @@
+
 package com.example.expensetracker.ui.screens
 
-import com.example.expensetracker.ui.theme.IncomeGreen
-import com.example.expensetracker.ui.theme.ExpenseRed
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -13,6 +12,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -22,14 +22,13 @@ import androidx.compose.material.icons.filled.ArrowDownward
 import androidx.compose.material.icons.filled.ArrowUpward
 import androidx.compose.material.icons.filled.BarChart
 import androidx.compose.material.icons.filled.Receipt
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -37,11 +36,20 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.expensetracker.data.local.ExpenseEntity
+import com.example.expensetracker.ui.theme.ExpenseRed
+import com.example.expensetracker.ui.theme.IncomeGreen
 import com.example.expensetracker.viewmodel.ExpenseViewModel
+
+private val DashboardBackground = Color(0xFF0F172A)
+private val DashboardCard = Color(0xFF1E293B)
+private val DashboardPrimaryText = Color(0xFFF8FAFC)
+private val DashboardSecondaryText = Color(0xFFCBD5E1)
+private val DashboardBlue = Color(0xFF2563EB)
 
 @Composable
 fun DashboardScreen(
@@ -50,7 +58,7 @@ fun DashboardScreen(
     onViewAllTransactions: () -> Unit,
     onViewAnalytics: () -> Unit,
     onViewBudgets: () -> Unit
-){
+) {
     val balance by viewModel.balance.collectAsStateWithLifecycle()
     val income by viewModel.totalIncome.collectAsStateWithLifecycle()
     val expenses by viewModel.totalExpenses.collectAsStateWithLifecycle()
@@ -59,40 +67,37 @@ fun DashboardScreen(
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .background(MaterialTheme.colorScheme.background)
+            .background(DashboardBackground)
+            .statusBarsPadding()
             .padding(horizontal = 20.dp)
     ) {
-
         Spacer(modifier = Modifier.height(20.dp))
 
-        // Greeting
         Text(
             text = "Good evening 👋",
             style = MaterialTheme.typography.headlineMedium,
-            fontWeight = FontWeight.Bold
+            fontWeight = FontWeight.Bold,
+            color = DashboardPrimaryText
         )
 
-        Spacer(modifier = Modifier.height(4.dp))
+        Spacer(modifier = Modifier.height(6.dp))
 
         Text(
             text = "Here's your financial overview",
             style = MaterialTheme.typography.bodyMedium,
-            color = MaterialTheme.colorScheme.onSurfaceVariant
+            color = DashboardSecondaryText
         )
 
         Spacer(modifier = Modifier.height(24.dp))
 
-        // Balance Card
         BalanceCard(balance = balance)
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        // Income + Expense cards
         Row(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.spacedBy(12.dp)
         ) {
-
             SummaryCard(
                 title = "Income",
                 amount = income,
@@ -112,52 +117,39 @@ fun DashboardScreen(
 
         Spacer(modifier = Modifier.height(28.dp))
 
-        // Recent Transactions header
         Row(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
-
             Text(
                 text = "Recent Transactions",
                 style = MaterialTheme.typography.titleLarge,
-                fontWeight = FontWeight.Bold
+                fontWeight = FontWeight.Bold,
+                color = DashboardPrimaryText
             )
 
-            TextButton(
-                onClick = onViewAllTransactions
-            ) {
-                Text("View all")
+            TextButton(onClick = onViewAllTransactions) {
+                Text(
+                    text = "View all",
+                    color = Color(0xFF93C5FD)
+                )
             }
         }
 
         Spacer(modifier = Modifier.height(8.dp))
 
-        // Transactions
         if (transactions.isEmpty()) {
-
             EmptyTransactions()
-
         } else {
-
-            transactions
-                .take(5)
-                .forEach { transaction ->
-
-                    TransactionItem(
-                        transaction = transaction
-                    )
-
-                    Spacer(
-                        modifier = Modifier.height(8.dp)
-                    )
-                }
+            transactions.take(5).forEach { transaction ->
+                TransactionItem(transaction = transaction)
+                Spacer(modifier = Modifier.height(8.dp))
+            }
         }
 
         Spacer(modifier = Modifier.height(20.dp))
 
-        // Add Transaction
         Button(
             onClick = onAddTransaction,
             modifier = Modifier
@@ -165,10 +157,10 @@ fun DashboardScreen(
                 .height(52.dp),
             shape = RoundedCornerShape(14.dp),
             colors = ButtonDefaults.buttonColors(
-                containerColor = MaterialTheme.colorScheme.primary
+                containerColor = DashboardBlue,
+                contentColor = Color.White
             )
         ) {
-
             Icon(
                 imageVector = Icons.Default.Add,
                 contentDescription = null
@@ -184,28 +176,32 @@ fun DashboardScreen(
 
         Spacer(modifier = Modifier.height(4.dp))
 
-        // Analytics
         TextButton(
             onClick = onViewAnalytics,
             modifier = Modifier.fillMaxWidth()
         ) {
-
             Icon(
                 imageVector = Icons.Default.BarChart,
-                contentDescription = null
+                contentDescription = null,
+                tint = Color(0xFF93C5FD)
             )
 
             Spacer(modifier = Modifier.width(6.dp))
 
-            Text("View Analytics")
+            Text(
+                text = "View Analytics",
+                color = Color(0xFF93C5FD)
+            )
         }
 
         TextButton(
             onClick = onViewBudgets,
             modifier = Modifier.fillMaxWidth()
         ) {
-
-            Text("View Budgets")
+            Text(
+                text = "View Budgets",
+                color = Color(0xFF93C5FD)
+            )
         }
 
         Spacer(modifier = Modifier.height(12.dp))
@@ -213,28 +209,24 @@ fun DashboardScreen(
 }
 
 @Composable
-private fun BalanceCard(
-    balance: Long
-) {
+private fun BalanceCard(balance: Long) {
     Card(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(20.dp),
         colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.primary
+            containerColor = DashboardBlue
         ),
         elevation = CardDefaults.cardElevation(
             defaultElevation = 4.dp
         )
     ) {
-
         Column(
             modifier = Modifier.padding(24.dp)
         ) {
-
             Text(
                 text = "Total Balance",
                 style = MaterialTheme.typography.labelLarge,
-                color = Color.White.copy(alpha = 0.8f)
+                color = Color.White.copy(alpha = 0.85f)
             )
 
             Spacer(modifier = Modifier.height(8.dp))
@@ -251,7 +243,7 @@ private fun BalanceCard(
             Text(
                 text = "Available balance",
                 style = MaterialTheme.typography.bodyMedium,
-                color = Color.White.copy(alpha = 0.75f)
+                color = Color.White.copy(alpha = 0.8f)
             )
         }
     }
@@ -261,7 +253,7 @@ private fun BalanceCard(
 private fun SummaryCard(
     title: String,
     amount: Long,
-    icon: androidx.compose.ui.graphics.vector.ImageVector,
+    icon: ImageVector,
     iconColor: Color,
     modifier: Modifier = Modifier
 ) {
@@ -269,29 +261,25 @@ private fun SummaryCard(
         modifier = modifier,
         shape = RoundedCornerShape(18.dp),
         colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surface
+            containerColor = DashboardCard
         ),
         elevation = CardDefaults.cardElevation(
             defaultElevation = 2.dp
         )
     ) {
-
         Column(
             modifier = Modifier.padding(16.dp)
         ) {
-
             Row(
                 verticalAlignment = Alignment.CenterVertically
             ) {
-
                 Box(
                     modifier = Modifier
                         .size(36.dp)
                         .clip(CircleShape)
-                        .background(iconColor.copy(alpha = 0.12f)),
+                        .background(iconColor.copy(alpha = 0.15f)),
                     contentAlignment = Alignment.Center
                 ) {
-
                     Icon(
                         imageVector = icon,
                         contentDescription = null,
@@ -305,7 +293,7 @@ private fun SummaryCard(
                 Text(
                     text = title,
                     style = MaterialTheme.typography.labelLarge,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                    color = DashboardSecondaryText
                 )
             }
 
@@ -314,53 +302,42 @@ private fun SummaryCard(
             Text(
                 text = "₹$amount",
                 style = MaterialTheme.typography.titleLarge,
-                fontWeight = FontWeight.Bold
+                fontWeight = FontWeight.Bold,
+                color = DashboardPrimaryText
             )
         }
     }
 }
 
 @Composable
-private fun TransactionItem(
-    transaction: ExpenseEntity
-) {
+private fun TransactionItem(transaction: ExpenseEntity) {
     val isIncome = transaction.type == "INCOME"
 
-    val amountColor = if (isIncome) {
-        IncomeGreen
-    } else {
-        ExpenseRed
-    }
+    val amountColor = if (isIncome) IncomeGreen else ExpenseRed
 
     Card(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(16.dp),
         colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surface
+            containerColor = DashboardCard
         ),
         elevation = CardDefaults.cardElevation(
             defaultElevation = 1.dp
         )
     ) {
-
         Row(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(14.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-
-            // Transaction icon
             Box(
                 modifier = Modifier
                     .size(42.dp)
                     .clip(CircleShape)
-                    .background(
-                        amountColor.copy(alpha = 0.12f)
-                    ),
+                    .background(amountColor.copy(alpha = 0.15f)),
                 contentAlignment = Alignment.Center
             ) {
-
                 Icon(
                     imageVector = if (isIncome) {
                         Icons.Default.ArrowUpward
@@ -375,15 +352,14 @@ private fun TransactionItem(
 
             Spacer(modifier = Modifier.width(12.dp))
 
-            // Transaction details
             Column(
                 modifier = Modifier.weight(1f)
             ) {
-
                 Text(
                     text = transaction.title,
                     style = MaterialTheme.typography.titleMedium,
-                    fontWeight = FontWeight.SemiBold
+                    fontWeight = FontWeight.SemiBold,
+                    color = DashboardPrimaryText
                 )
 
                 Spacer(modifier = Modifier.height(2.dp))
@@ -391,11 +367,10 @@ private fun TransactionItem(
                 Text(
                     text = transaction.category,
                     style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                    color = DashboardSecondaryText
                 )
             }
 
-            // Amount
             Text(
                 text = if (isIncome) {
                     "+₹${transaction.amount}"
@@ -412,27 +387,24 @@ private fun TransactionItem(
 
 @Composable
 private fun EmptyTransactions() {
-
     Card(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(16.dp),
         colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surface
+            containerColor = DashboardCard
         )
     ) {
-
         Column(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(28.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-
             Icon(
                 imageVector = Icons.Default.Receipt,
                 contentDescription = null,
                 modifier = Modifier.size(40.dp),
-                tint = MaterialTheme.colorScheme.onSurfaceVariant
+                tint = DashboardSecondaryText
             )
 
             Spacer(modifier = Modifier.height(10.dp))
@@ -440,7 +412,8 @@ private fun EmptyTransactions() {
             Text(
                 text = "No transactions yet",
                 style = MaterialTheme.typography.titleMedium,
-                fontWeight = FontWeight.SemiBold
+                fontWeight = FontWeight.SemiBold,
+                color = DashboardPrimaryText
             )
 
             Spacer(modifier = Modifier.height(4.dp))
@@ -448,7 +421,7 @@ private fun EmptyTransactions() {
             Text(
                 text = "Add your first transaction to get started",
                 style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
+                color = DashboardSecondaryText
             )
         }
     }

@@ -27,4 +27,15 @@ interface ExpenseDao {
 
     @Query("DELETE FROM expenses")
     suspend fun deleteAllExpenses()
+    @Query(
+        """
+    SELECT COUNT(*) FROM (
+        SELECT category, month, year
+        FROM budgets
+        GROUP BY category, month, year
+        HAVING COUNT(*) > 1
+    )
+    """
+    )
+    suspend fun countDuplicateBudgetGroups(): Int
 }

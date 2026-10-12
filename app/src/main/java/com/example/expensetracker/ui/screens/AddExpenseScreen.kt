@@ -1,15 +1,21 @@
+
 package com.example.expensetracker.ui.screens
 
-import androidx.compose.ui.unit.dp
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
+//import androidx.compose.foundation.layout.weight
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
@@ -19,6 +25,7 @@ import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -26,14 +33,22 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
-import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.ui.unit.dp
 import com.example.expensetracker.data.expenseCategories
 import com.example.expensetracker.data.local.ExpenseEntity
 import com.example.expensetracker.viewmodel.ExpenseViewModel
+
+private val ScreenBackground = Color(0xFFF8FAFC)
+private val FieldBackground = Color.White
+private val MainText = Color(0xFF0F172A)
+private val SecondaryText = Color(0xFF64748B)
+private val BorderColor = Color(0xFFCBD5E1)
+private val AccentBlue = Color(0xFF2563EB)
 
 @Composable
 fun AddExpenseScreen(
@@ -47,22 +62,28 @@ fun AddExpenseScreen(
     var isIncome by remember { mutableStateOf(false) }
     var categoryExpanded by remember { mutableStateOf(false) }
 
+    val scrollState = rememberScrollState()
+
     Column(
-        modifier = Modifier.padding(20.dp),
+        modifier = Modifier
+            .fillMaxSize()
+            .background(ScreenBackground)
+            .imePadding()
+            .verticalScroll(scrollState)
+            .padding(horizontal = 20.dp, vertical = 24.dp),
         verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
-
-        // Header
         Text(
             text = "Add Transaction",
             style = MaterialTheme.typography.headlineMedium,
-            fontWeight = FontWeight.Bold
+            fontWeight = FontWeight.Bold,
+            color = MainText
         )
 
         Text(
             text = "Record your income or expense",
-            style = MaterialTheme.typography.bodyMedium,
-            color = MaterialTheme.colorScheme.onSurfaceVariant
+            style = MaterialTheme.typography.bodyLarge,
+            color = SecondaryText
         )
 
         Spacer(modifier = Modifier.height(4.dp))
@@ -70,59 +91,47 @@ fun AddExpenseScreen(
         // Income / Expense selector
         Card(
             modifier = Modifier.fillMaxWidth(),
-            shape = RoundedCornerShape(16.dp),
+            shape = RoundedCornerShape(18.dp),
             colors = CardDefaults.cardColors(
-                containerColor = MaterialTheme.colorScheme.surfaceVariant
+                containerColor = Color(0xFF26384D)
             )
         ) {
-
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(6.dp),
-                horizontalArrangement = Arrangement.spacedBy(6.dp)
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
             ) {
-
-                if (!isIncome) {
-                    Button(
-                        onClick = { isIncome = false },
-                        modifier = Modifier.weight(1f),
-                        shape = RoundedCornerShape(12.dp)
-                    ) {
-                        Text(
-                            text = "Expense",
-                            fontWeight = FontWeight.SemiBold
-                        )
-                    }
-                } else {
-                    OutlinedButton(
-                        onClick = { isIncome = false },
-                        modifier = Modifier.weight(1f),
-                        shape = RoundedCornerShape(12.dp)
-                    ) {
-                        Text("Expense")
-                    }
+                Button(
+                    onClick = { isIncome = false },
+                    modifier = Modifier.weight(1f),
+                    shape = RoundedCornerShape(12.dp),
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = if (!isIncome) AccentBlue
+                        else Color(0xFF26384D),
+                        contentColor = Color.White
+                    )
+                ) {
+                    Text(
+                        text = "Expense",
+                        fontWeight = FontWeight.SemiBold
+                    )
                 }
 
-                if (isIncome) {
-                    Button(
-                        onClick = { isIncome = true },
-                        modifier = Modifier.weight(1f),
-                        shape = RoundedCornerShape(12.dp)
-                    ) {
-                        Text(
-                            text = "Income",
-                            fontWeight = FontWeight.SemiBold
-                        )
-                    }
-                } else {
-                    OutlinedButton(
-                        onClick = { isIncome = true },
-                        modifier = Modifier.weight(1f),
-                        shape = RoundedCornerShape(12.dp)
-                    ) {
-                        Text("Income")
-                    }
+                Button(
+                    onClick = { isIncome = true },
+                    modifier = Modifier.weight(1f),
+                    shape = RoundedCornerShape(12.dp),
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = if (isIncome) AccentBlue
+                        else Color(0xFF26384D),
+                        contentColor = Color.White
+                    )
+                ) {
+                    Text(
+                        text = "Income",
+                        fontWeight = FontWeight.SemiBold
+                    )
                 }
             }
         }
@@ -130,48 +139,94 @@ fun AddExpenseScreen(
         // Amount
         OutlinedTextField(
             value = amount,
-            onValueChange = { amount = it },
-            label = { Text("Amount") },
-            placeholder = { Text("0") },
-            prefix = { Text("₹ ") },
+            onValueChange = { newValue ->
+                if (newValue.isEmpty() || newValue.all { it.isDigit() }) {
+                    amount = newValue
+                }
+            },
             modifier = Modifier.fillMaxWidth(),
+            label = {
+                Text("Amount")
+            },
+            placeholder = {
+                Text("Enter amount")
+            },
+            prefix = {
+                Text(
+                    text = "₹",
+                    color = MainText
+                )
+            },
             singleLine = true,
             keyboardOptions = KeyboardOptions(
                 keyboardType = KeyboardType.Number
             ),
-            shape = RoundedCornerShape(14.dp)
+            shape = RoundedCornerShape(14.dp),
+            colors = OutlinedTextFieldDefaults.colors(
+                focusedTextColor = MainText,
+                unfocusedTextColor = MainText,
+                disabledTextColor = SecondaryText,
+                focusedContainerColor = FieldBackground,
+                unfocusedContainerColor = FieldBackground,
+                focusedBorderColor = AccentBlue,
+                unfocusedBorderColor = BorderColor,
+                focusedLabelColor = AccentBlue,
+                unfocusedLabelColor = SecondaryText,
+                focusedPlaceholderColor = SecondaryText,
+                unfocusedPlaceholderColor = SecondaryText,
+                cursorColor = AccentBlue
+            )
         )
 
         // Title
         OutlinedTextField(
             value = title,
             onValueChange = { title = it },
-            label = { Text("Title") },
-            placeholder = { Text("e.g. Grocery shopping") },
             modifier = Modifier.fillMaxWidth(),
+            label = {
+                Text("Title")
+            },
+            placeholder = {
+                Text("e.g. Grocery shopping")
+            },
             singleLine = true,
-            shape = RoundedCornerShape(14.dp)
+            shape = RoundedCornerShape(14.dp),
+            colors = OutlinedTextFieldDefaults.colors(
+                focusedTextColor = MainText,
+                unfocusedTextColor = MainText,
+                disabledTextColor = SecondaryText,
+                focusedContainerColor = FieldBackground,
+                unfocusedContainerColor = FieldBackground,
+                focusedBorderColor = AccentBlue,
+                unfocusedBorderColor = BorderColor,
+                focusedLabelColor = AccentBlue,
+                unfocusedLabelColor = SecondaryText,
+                focusedPlaceholderColor = SecondaryText,
+                unfocusedPlaceholderColor = SecondaryText,
+                cursorColor = AccentBlue
+            )
         )
 
         // Category
         Column(
             modifier = Modifier.fillMaxWidth()
         ) {
-
             Text(
                 text = "Category",
-                style = MaterialTheme.typography.labelLarge,
-                fontWeight = FontWeight.Medium
+                style = MaterialTheme.typography.titleMedium,
+                fontWeight = FontWeight.SemiBold,
+                color = MainText
             )
 
-            Spacer(modifier = Modifier.height(6.dp))
+            Spacer(modifier = Modifier.height(8.dp))
 
             OutlinedButton(
-                onClick = {
-                    categoryExpanded = true
-                },
+                onClick = { categoryExpanded = true },
                 modifier = Modifier.fillMaxWidth(),
-                shape = RoundedCornerShape(14.dp)
+                shape = RoundedCornerShape(14.dp),
+                colors = ButtonDefaults.outlinedButtonColors(
+                    contentColor = MainText
+                )
             ) {
                 Text(
                     text = if (category.isEmpty()) {
@@ -179,24 +234,29 @@ fun AddExpenseScreen(
                     } else {
                         category
                     },
-                    modifier = Modifier.weight(1f)
+                    modifier = Modifier.weight(1f),
+                    color = if (category.isEmpty()) SecondaryText else MainText
                 )
 
-                Text("⌄")
+                Text("⌄", color = SecondaryText)
             }
+
 
             DropdownMenu(
                 expanded = categoryExpanded,
                 onDismissRequest = {
                     categoryExpanded = false
-                }
+                },
+                containerColor = Color.White
             ) {
-
                 expenseCategories.forEach { item ->
-
                     DropdownMenuItem(
                         text = {
-                            Text(item)
+                            Text(
+                                text = item,
+                                color = Color(0xFF0F172A),
+                                style = MaterialTheme.typography.bodyLarge
+                            )
                         },
                         onClick = {
                             category = item
@@ -205,26 +265,44 @@ fun AddExpenseScreen(
                     )
                 }
             }
+
         }
 
         // Note
         OutlinedTextField(
             value = note,
             onValueChange = { note = it },
-            label = { Text("Note") },
-            placeholder = { Text("Optional") },
             modifier = Modifier
                 .fillMaxWidth()
-                .height(110.dp),
-            shape = RoundedCornerShape(14.dp)
+                .height(120.dp),
+            label = {
+                Text("Note")
+            },
+            placeholder = {
+                Text("Optional")
+            },
+            shape = RoundedCornerShape(14.dp),
+            colors = OutlinedTextFieldDefaults.colors(
+                focusedTextColor = MainText,
+                unfocusedTextColor = MainText,
+                disabledTextColor = SecondaryText,
+                focusedContainerColor = FieldBackground,
+                unfocusedContainerColor = FieldBackground,
+                focusedBorderColor = AccentBlue,
+                unfocusedBorderColor = BorderColor,
+                focusedLabelColor = AccentBlue,
+                unfocusedLabelColor = SecondaryText,
+                focusedPlaceholderColor = SecondaryText,
+                unfocusedPlaceholderColor = SecondaryText,
+                cursorColor = AccentBlue
+            )
         )
 
         Spacer(modifier = Modifier.height(4.dp))
 
-        // Save button
+        // Save Transaction
         Button(
             onClick = {
-
                 val amountValue = amount.toLongOrNull()
 
                 if (
@@ -233,22 +311,16 @@ fun AddExpenseScreen(
                     amountValue > 0 &&
                     category.isNotBlank()
                 ) {
-
                     val transaction = ExpenseEntity(
                         title = title.trim(),
                         amount = amountValue,
                         category = category,
-                        type = if (isIncome) {
-                            "INCOME"
-                        } else {
-                            "EXPENSE"
-                        },
+                        type = if (isIncome) "INCOME" else "EXPENSE",
                         date = System.currentTimeMillis(),
                         note = note.trim()
                     )
 
                     viewModel.addTransaction(transaction)
-
                     onTransactionSaved()
                 }
             },
@@ -257,13 +329,16 @@ fun AddExpenseScreen(
                 .height(54.dp),
             shape = RoundedCornerShape(14.dp),
             colors = ButtonDefaults.buttonColors(
-                containerColor = MaterialTheme.colorScheme.primary
+                containerColor = AccentBlue,
+                contentColor = Color.White
             )
         ) {
             Text(
                 text = "Save Transaction",
-                fontWeight = FontWeight.SemiBold
+                fontWeight = FontWeight.Bold
             )
         }
+
+        Spacer(modifier = Modifier.height(12.dp))
     }
 }
