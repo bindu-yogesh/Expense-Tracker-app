@@ -1,5 +1,9 @@
 package com.example.expensetracker.viewmodel
 
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
+import java.util.Calendar
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.expensetracker.data.local.ExpenseEntity
@@ -75,6 +79,46 @@ class ExpenseViewModel(
                 scope = viewModelScope,
                 started = SharingStarted.WhileSubscribed(5000),
                 initialValue = emptyMap()
+            )
+    val dailyExpenses: StateFlow<List<Pair<String, Long>>> =
+        expenses
+            .map { list ->
+                val dateFormat = java.text.SimpleDateFormat(
+                    "EEE",
+                    java.util.Locale.getDefault()
+                )
+
+                (6 downTo 0).map { daysAgo ->
+                    val day = java.util.Calendar.getInstance().apply {
+                        add(java.util.Calendar.DAY_OF_YEAR, -daysAgo)
+                        set(java.util.Calendar.HOUR_OF_DAY, 0)
+                        set(java.util.Calendar.MINUTE, 0)
+                        set(java.util.Calendar.SECOND, 0)
+                        set(java.util.Calendar.MILLISECOND, 0)
+                    }
+
+                    val startOfDay = day.timeInMillis
+
+                    val endOfDay = java.util.Calendar.getInstance().apply {
+                        timeInMillis = startOfDay
+                        add(java.util.Calendar.DAY_OF_YEAR, 1)
+                    }.timeInMillis
+
+                    val amount = list
+                        .filter {
+                            it.type == "EXPENSE" &&
+                                    it.date >= startOfDay &&
+                                    it.date < endOfDay
+                        }
+                        .sumOf { it.amount }
+
+                    dateFormat.format(day.time) to amount
+                }
+            }
+            .stateIn(
+                scope = viewModelScope,
+                started = SharingStarted.WhileSubscribed(5000),
+                initialValue = emptyList()
             )
     val balance: StateFlow<Long> =
         combine(

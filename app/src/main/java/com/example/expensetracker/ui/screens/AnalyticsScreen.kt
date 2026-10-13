@@ -31,6 +31,7 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -39,11 +40,10 @@ import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.compose.runtime.getValue
-import androidx.compose.ui.graphics.vector.ImageVector
 import com.example.expensetracker.viewmodel.ExpenseViewModel
 
 private val AnalyticsBackground = Color(0xFF0B1120)
@@ -74,7 +74,11 @@ fun AnalyticsScreen(
     val totalIncome by viewModel.totalIncome.collectAsStateWithLifecycle()
     val totalExpenses by viewModel.totalExpenses.collectAsStateWithLifecycle()
     val balance by viewModel.balance.collectAsStateWithLifecycle()
+
     val expensesByCategory by viewModel.expensesByCategory
+        .collectAsStateWithLifecycle()
+
+    val dailyExpenses by viewModel.dailyExpenses
         .collectAsStateWithLifecycle()
 
     val sortedCategories = expensesByCategory
@@ -164,7 +168,12 @@ fun AnalyticsScreen(
                 BalanceCard(balance = balance)
             }
 
-            // Donut chart
+            // 7-day spending trend
+            item {
+                SpendingTrendCard(dailyExpenses = dailyExpenses)
+            }
+
+            // Circular category chart
             item {
                 Card(
                     modifier = Modifier.fillMaxWidth(),
@@ -251,6 +260,117 @@ fun AnalyticsScreen(
 }
 
 @Composable
+private fun SpendingTrendCard(
+    dailyExpenses: List<Pair<String, Long>>
+) {
+    val maxAmount = dailyExpenses
+        .maxOfOrNull { it.second }
+        ?.coerceAtLeast(1L) ?: 1L
+
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(22.dp),
+        colors = CardDefaults.cardColors(
+            containerColor = AnalyticsCard
+        ),
+        border = BorderStroke(1.dp, AnalyticsBorder)
+    ) {
+        Column(
+            modifier = Modifier.padding(18.dp)
+        ) {
+            Text(
+                text = "7-Day Spending Trend",
+                style = MaterialTheme.typography.titleMedium,
+                fontWeight = FontWeight.Bold,
+                color = AnalyticsText
+            )
+
+            Spacer(Modifier.height(5.dp))
+
+            Text(
+                text = "Track your daily expenses",
+                style = MaterialTheme.typography.bodySmall,
+                color = AnalyticsMuted
+            )
+
+            Spacer(Modifier.height(24.dp))
+
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(155.dp),
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                verticalAlignment = Alignment.Bottom
+            ) {
+                dailyExpenses.forEach { (day, amount) ->
+                    Column(
+                        modifier = Modifier.weight(1f),
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        verticalArrangement = Arrangement.Bottom
+                    ) {
+                        Text(
+                            text = when {
+                                amount <= 0L -> "—"
+                                amount >= 1000L ->
+                                    "₹${"%.1f".format(amount / 1000.0)}k"
+                                else -> "₹$amount"
+                            },
+                            style = MaterialTheme.typography.labelSmall,
+                            color = AnalyticsMuted,
+                            maxLines = 1
+                        )
+
+                        Spacer(Modifier.height(6.dp))
+
+                        val barHeight = (
+                                amount.toFloat() / maxAmount.toFloat()
+                                ).coerceIn(0f, 1f) * 95f
+
+                        Box(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(95.dp),
+                            contentAlignment = Alignment.BottomCenter
+                        ) {
+                            Box(
+                                modifier = Modifier
+                                    .fillMaxWidth(0.65f)
+                                    .height(
+                                        barHeight.coerceAtLeast(
+                                            if (amount > 0L) 5f else 2f
+                                        ).dp
+                                    )
+                                    .clip(
+                                        RoundedCornerShape(
+                                            topStart = 8.dp,
+                                            topEnd = 8.dp
+                                        )
+                                    )
+                                    .background(
+                                        if (amount > 0L) {
+                                            AnalyticsBlue
+                                        } else {
+                                            AnalyticsBorder
+                                        }
+                                    )
+                            )
+                        }
+
+                        Spacer(Modifier.height(8.dp))
+
+                        Text(
+                            text = day,
+                            style = MaterialTheme.typography.labelSmall,
+                            color = AnalyticsMuted
+                        )
+                    }
+                }
+            }
+        }
+    }
+}
+
+@Composable
 private fun DonutChart(
     expensesByCategory: List<Pair<String, Long>>
 ) {
@@ -275,6 +395,7 @@ private fun DonutChart(
             ) {
                 val strokeWidth = 22.dp.toPx()
                 val diameter = size.minDimension - strokeWidth
+
                 val topLeft = Offset(
                     (size.width - diameter) / 2f,
                     (size.height - diameter) / 2f
@@ -325,12 +446,12 @@ private fun DonutChart(
 
         // Category legend with amounts and percentages
         Column(
-            modifier = Modifier
-                .weight(1f),
+            modifier = Modifier.weight(1f),
             verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
             expensesByCategory.forEachIndexed { index, entry ->
                 val (category, amount) = entry
+
                 val percentage = if (total > 0L) {
                     amount.toDouble() / total.toDouble() * 100
                 } else {
