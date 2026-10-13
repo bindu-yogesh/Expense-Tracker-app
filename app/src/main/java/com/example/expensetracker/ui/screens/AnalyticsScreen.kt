@@ -1,4 +1,3 @@
-
 package com.example.expensetracker.ui.screens
 
 import androidx.compose.foundation.BorderStroke
