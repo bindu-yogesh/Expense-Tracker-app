@@ -14,20 +14,18 @@ A modern Android application built with **Kotlin, Jetpack Compose, and Room Data
 
 ## 📱 Screenshots
 
-<!-- Keep these paths aligned with the actual files in your screenshots folder. -->
-
 <p align="center">
-  <img src="screenshots/dashboard.png" alt="Expense Tracker Dashboard" width="200"/>
+  <img src="screenshots/dashboard.jpeg" alt="Expense Tracker Dashboard" width="200"/>
   &nbsp;
-  <img src="screenshots/add-transaction.png" alt="Add Transaction Screen" width="200"/>
+  <img src="screenshots/add-transaction.jpeg" alt="Add Transaction Screen" width="200"/>
   &nbsp;
-  <img src="screenshots/transaction-history.png" alt="Transaction History Screen" width="200"/>
+  <img src="screenshots/transaction-history.jpeg" alt="Transaction History Screen" width="200"/>
 </p>
 
 <p align="center">
-  <img src="screenshots/analytics.png" alt="Expense Analytics Screen" width="200"/>
+  <img src="screenshots/analytics.jpeg" alt="Expense Analytics Screen" width="200"/>
   &nbsp;
-  <img src="screenshots/budget.png" alt="Budget Management Screen" width="200"/>
+  <img src="screenshots/budget.jpeg" alt="Budget Management Screen" width="200"/>
 </p>
 
 ---
@@ -56,7 +54,7 @@ A modern Android application built with **Kotlin, Jetpack Compose, and Room Data
 - Create budgets for individual expense categories.
 - Set budgets for specific months and years.
 - Edit and delete existing budgets.
-- Review your category budgets to help manage spending.
+- Review category budgets to help manage spending.
 
 ### 🎨 User Experience
 - Clean baby-blue and white theme.
@@ -85,43 +83,48 @@ A modern Android application built with **Kotlin, Jetpack Compose, and Room Data
 
 ## 🏗️ Architecture
 
-The project separates UI components, application logic, and database operations to keep the code organized and maintainable.
+The application separates UI components, application logic, and database operations to keep the code organized and maintainable.
 
 ```text
 Expense-Tracker-app/
-└── app/
-    └── src/main/
-        ├── java/com/example/expensetracker/
-        │   ├── data/
-        │   │   ├── Category.kt
-        │   │   ├── local/
-        │   │   │   ├── ExpenseEntity.kt
-        │   │   │   ├── ExpenseDao.kt
-        │   │   │   ├── ExpenseDatabase.kt
-        │   │   │   ├── BudgetEntity.kt
-        │   │   │   └── BudgetDao.kt
-        │   │   ├── repository/
-        │   │   │   ├── ExpenseRepository.kt
-        │   │   │   └── BudgetRepository.kt
-        │   │   └── ...
-        │   ├── ui/
-        │   │   ├── navigation/
-        │   │   └── screens/
-        │   └── viewmodel/
-        │       ├── ExpenseViewModel.kt
-        │       └── BudgetViewModel.kt
-        └── res/
-            └── mipmap-*/
+├── app/
+│   └── src/main/
+│       ├── java/com/example/expensetracker/
+│       │   ├── data/
+│       │   │   ├── Category.kt
+│       │   │   ├── local/
+│       │   │   │   ├── ExpenseEntity.kt
+│       │   │   │   ├── ExpenseDao.kt
+│       │   │   │   ├── ExpenseDatabase.kt
+│       │   │   │   ├── BudgetEntity.kt
+│       │   │   │   └── BudgetDao.kt
+│       │   │   └── repository/
+│       │   │       ├── ExpenseRepository.kt
+│       │   │       └── BudgetRepository.kt
+│       │   ├── ui/
+│       │   │   └── navigation/
+│       │   └── viewmodel/
+│       │       ├── ExpenseViewModel.kt
+│       │       └── BudgetViewModel.kt
+│       └── res/
+│           └── mipmap-*/
+├── screenshots/
+│   ├── dashboard.jpeg
+│   ├── add-transaction.jpeg
+│   ├── transaction-history.jpeg
+│   ├── analytics.jpeg
+│   └── budget.jpeg
+└── README.md
 ```
 
-*This is a high-level illustration. Adjust folder and file names if they differ from the actual repository.*
+*This is a high-level overview of the project structure. Your actual folders and filenames may differ.*
 
 ### Architecture Overview
 
 - **UI layer:** Compose screens render data and respond to user interactions.
 - **ViewModel layer:** Exposes observable UI state and coordinates application operations.
 - **Repository layer:** Separates data access from UI-facing application logic.
-- **Data layer:** Room entities, DAOs, and the database handle local transaction and budget storage.
+- **Data layer:** Room entities, DAOs, and the database manage local transaction and budget storage.
 
 ---
 
@@ -131,7 +134,7 @@ Expense-Tracker-app/
 
 - Android Studio
 - Android SDK
-- A compatible JDK for the project's Gradle configuration
+- A JDK compatible with the project's Gradle configuration
 - Git
 
 ### 1. Clone the repository
@@ -183,9 +186,9 @@ The application uses **Room Database** for local persistence.
 
 - Expense and income transactions are stored locally.
 - Category budgets are stored locally.
-- Database schema migrations are configured for supported schema changes.
+- Database migrations are configured for supported schema changes.
 
-The README does not claim cloud synchronization, online account access, or encrypted financial storage.
+The application documentation does not claim cloud synchronization or online account access.
 
 ---
 
@@ -230,7 +233,7 @@ Computer Science and Engineering Student | Android Development
 
 ## 📄 License
 
-No open-source license has been added yet. Until a license is chosen and included in the repository, reuse and redistribution are not explicitly granted by this project README.
+No open-source license has been added yet. Until a license is chosen and included in the repository, reuse and redistribution are not explicitly granted.
 
 ---
 
