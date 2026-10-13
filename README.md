@@ -23,7 +23,7 @@ A modern Android application built with **Kotlin, Jetpack Compose, and Room Data
 </p>
 
 <p align="center">
-  <img src="screenshots/analytics.jpeg" alt="Expense Analytics Screen" width="200"/>
+  <img src="screenshots/analytics..jpeg" alt="Expense Analytics Screen" width="200"/>
   &nbsp;
   <img src="screenshots/budget.jpeg" alt="Budget Management Screen" width="200"/>
 </p>
