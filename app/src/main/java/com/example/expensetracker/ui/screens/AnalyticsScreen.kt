@@ -1,6 +1,8 @@
+
 package com.example.expensetracker.ui.screens
 
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -29,22 +31,20 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.StrokeCap
+import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.compose.runtime.getValue
+import androidx.compose.ui.graphics.vector.ImageVector
 import com.example.expensetracker.viewmodel.ExpenseViewModel
-import com.patrykandpatrick.vico.compose.cartesian.CartesianChartHost
-import com.patrykandpatrick.vico.compose.cartesian.layer.rememberColumnCartesianLayer
-import com.patrykandpatrick.vico.compose.cartesian.rememberCartesianChart
-import com.patrykandpatrick.vico.core.cartesian.data.CartesianChartModelProducer
-import com.patrykandpatrick.vico.core.cartesian.data.columnSeries
 
 private val AnalyticsBackground = Color(0xFF0B1120)
 private val AnalyticsCard = Color(0xFF151F32)
@@ -55,6 +55,17 @@ private val AnalyticsBlue = Color(0xFF60A5FA)
 private val AnalyticsGreen = Color(0xFF4ADE80)
 private val AnalyticsRed = Color(0xFFF87171)
 
+private val DonutColors = listOf(
+    Color(0xFFF59E0B),
+    Color(0xFF3B82F6),
+    Color(0xFF8B5CF6),
+    Color(0xFF2DD4BF),
+    Color(0xFFF87171),
+    Color(0xFF60A5FA),
+    Color(0xFFA78BFA),
+    Color(0xFF34D399)
+)
+
 @Composable
 fun AnalyticsScreen(
     viewModel: ExpenseViewModel,
@@ -63,28 +74,13 @@ fun AnalyticsScreen(
     val totalIncome by viewModel.totalIncome.collectAsStateWithLifecycle()
     val totalExpenses by viewModel.totalExpenses.collectAsStateWithLifecycle()
     val balance by viewModel.balance.collectAsStateWithLifecycle()
-
     val expensesByCategory by viewModel.expensesByCategory
         .collectAsStateWithLifecycle()
 
-    val chartModelProducer = remember {
-        CartesianChartModelProducer()
-    }
-
-    LaunchedEffect(expensesByCategory) {
-        if (expensesByCategory.isNotEmpty()) {
-            chartModelProducer.runTransaction {
-                columnSeries {
-                    series(
-                        expensesByCategory
-                            .toList()
-                            .sortedByDescending { it.second }
-                            .map { it.second }
-                    )
-                }
-            }
-        }
-    }
+    val sortedCategories = expensesByCategory
+        .toList()
+        .filter { it.second > 0L }
+        .sortedByDescending { it.second }
 
     Column(
         modifier = Modifier
@@ -163,12 +159,12 @@ fun AnalyticsScreen(
                 }
             }
 
-            // Balance
+            // Current balance
             item {
                 BalanceCard(balance = balance)
             }
 
-            // Chart
+            // Donut chart
             item {
                 Card(
                     modifier = Modifier.fillMaxWidth(),
@@ -202,7 +198,7 @@ fun AnalyticsScreen(
 
                             Column {
                                 Text(
-                                    text = "Expenses by category",
+                                    text = "Spending Overview",
                                     style = MaterialTheme.typography.titleMedium,
                                     fontWeight = FontWeight.Bold,
                                     color = AnalyticsText
@@ -218,15 +214,9 @@ fun AnalyticsScreen(
 
                         Spacer(Modifier.height(20.dp))
 
-                        if (expensesByCategory.isNotEmpty()) {
-                            CartesianChartHost(
-                                chart = rememberCartesianChart(
-                                    rememberColumnCartesianLayer()
-                                ),
-                                modelProducer = chartModelProducer,
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .height(230.dp)
+                        if (sortedCategories.isNotEmpty()) {
+                            DonutChart(
+                                expensesByCategory = sortedCategories
                             )
                         } else {
                             EmptyAnalyticsState()
@@ -236,7 +226,7 @@ fun AnalyticsScreen(
             }
 
             // Category breakdown
-            if (expensesByCategory.isNotEmpty()) {
+            if (sortedCategories.isNotEmpty()) {
                 item {
                     Text(
                         text = "Category breakdown",
@@ -247,9 +237,7 @@ fun AnalyticsScreen(
                 }
 
                 items(
-                    items = expensesByCategory
-                        .toList()
-                        .sortedByDescending { it.second },
+                    items = sortedCategories,
                     key = { it.first }
                 ) { (category, amount) ->
                     CategoryExpenseItem(
@@ -263,10 +251,140 @@ fun AnalyticsScreen(
 }
 
 @Composable
+private fun DonutChart(
+    expensesByCategory: List<Pair<String, Long>>
+) {
+    val total = expensesByCategory.sumOf { it.second }
+
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(vertical = 8.dp),
+        horizontalArrangement = Arrangement.spacedBy(12.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        // Circular chart with total in the centre
+        Box(
+            modifier = Modifier
+                .weight(1.1f)
+                .size(180.dp),
+            contentAlignment = Alignment.Center
+        ) {
+            Canvas(
+                modifier = Modifier.fillMaxSize()
+            ) {
+                val strokeWidth = 22.dp.toPx()
+                val diameter = size.minDimension - strokeWidth
+                val topLeft = Offset(
+                    (size.width - diameter) / 2f,
+                    (size.height - diameter) / 2f
+                )
+
+                if (total > 0L) {
+                    var startAngle = -90f
+
+                    expensesByCategory.forEachIndexed { index, entry ->
+                        val sweepAngle =
+                            entry.second.toFloat() / total.toFloat() * 360f
+
+                        drawArc(
+                            color = DonutColors[index % DonutColors.size],
+                            startAngle = startAngle,
+                            sweepAngle = sweepAngle,
+                            useCenter = false,
+                            topLeft = topLeft,
+                            size = Size(diameter, diameter),
+                            style = Stroke(
+                                width = strokeWidth,
+                                cap = StrokeCap.Butt
+                            )
+                        )
+
+                        startAngle += sweepAngle
+                    }
+                }
+            }
+
+            Column(
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                Text(
+                    text = "₹$total",
+                    color = AnalyticsText,
+                    style = MaterialTheme.typography.titleLarge,
+                    fontWeight = FontWeight.Bold
+                )
+
+                Text(
+                    text = "Total Expenses",
+                    color = AnalyticsMuted,
+                    style = MaterialTheme.typography.labelSmall
+                )
+            }
+        }
+
+        // Category legend with amounts and percentages
+        Column(
+            modifier = Modifier
+                .weight(1f),
+            verticalArrangement = Arrangement.spacedBy(12.dp)
+        ) {
+            expensesByCategory.forEachIndexed { index, entry ->
+                val (category, amount) = entry
+                val percentage = if (total > 0L) {
+                    amount.toDouble() / total.toDouble() * 100
+                } else {
+                    0.0
+                }
+
+                Row(
+                    verticalAlignment = Alignment.Top,
+                    horizontalArrangement = Arrangement.spacedBy(7.dp)
+                ) {
+                    Box(
+                        modifier = Modifier
+                            .padding(top = 4.dp)
+                            .size(9.dp)
+                            .clip(CircleShape)
+                            .background(
+                                DonutColors[index % DonutColors.size]
+                            )
+                    )
+
+                    Column(
+                        modifier = Modifier.weight(1f)
+                    ) {
+                        Text(
+                            text = category,
+                            color = AnalyticsMuted,
+                            style = MaterialTheme.typography.labelMedium,
+                            maxLines = 1
+                        )
+
+                        Text(
+                            text = "₹$amount",
+                            color = AnalyticsText,
+                            style = MaterialTheme.typography.bodyMedium,
+                            fontWeight = FontWeight.SemiBold
+                        )
+
+                        Text(
+                            text = "${"%.0f".format(percentage)}%",
+                            color = AnalyticsMuted,
+                            style = MaterialTheme.typography.labelSmall
+                        )
+                    }
+                }
+            }
+        }
+    }
+}
+
+@Composable
 private fun AnalyticsCard(
     title: String,
     amount: Long,
-    icon: androidx.compose.ui.graphics.vector.ImageVector,
+    icon: ImageVector,
     iconColor: Color,
     modifier: Modifier = Modifier
 ) {
