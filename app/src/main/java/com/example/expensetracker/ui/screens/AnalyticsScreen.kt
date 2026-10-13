@@ -43,27 +43,34 @@ import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.expensetracker.viewmodel.ExpenseViewModel
+import java.util.Locale
 
-private val AnalyticsBackground = Color(0xFF0B1120)
-private val AnalyticsCard = Color(0xFF151F32)
-private val AnalyticsBorder = Color(0xFF29364B)
-private val AnalyticsText = Color(0xFFF8FAFC)
-private val AnalyticsMuted = Color(0xFF94A3B8)
-private val AnalyticsBlue = Color(0xFF60A5FA)
-private val AnalyticsGreen = Color(0xFF4ADE80)
-private val AnalyticsRed = Color(0xFFF87171)
+// Baby-blue and white theme
+private val AnalyticsBackground = Color(0xFFF3F8FC)
+private val AnalyticsCard = Color(0xFFFFFFFF)
+private val AnalyticsBorder = Color(0xFFE0EAF3)
+private val AnalyticsText = Color(0xFF243B53)
+private val AnalyticsMuted = Color(0xFF71849A)
+private val AnalyticsBlue = Color(0xFF5AA9E6)
+private val AnalyticsBlueDark = Color(0xFF356F9F)
+private val AnalyticsLightBlue = Color(0xFFE4F2FF)
+private val AnalyticsGreen = Color(0xFF219A75)
+private val AnalyticsRed = Color(0xFFE16D75)
 
 private val DonutColors = listOf(
-    Color(0xFFF59E0B),
-    Color(0xFF3B82F6),
-    Color(0xFF8B5CF6),
-    Color(0xFF2DD4BF),
-    Color(0xFFF87171),
-    Color(0xFF60A5FA),
-    Color(0xFFA78BFA),
-    Color(0xFF34D399)
+    Color(0xFF5AA9E6),
+    Color(0xFF219A75),
+    Color(0xFFE6A23C),
+    Color(0xFF8B83D6),
+    Color(0xFFE16D75),
+    Color(0xFF43B7B0),
+    Color(0xFF6E9DE8),
+    Color(0xFFB18ACB),
+    Color(0xFF80BFA8),
+    Color(0xFFE89B70)
 )
 
 @Composable
@@ -74,12 +81,8 @@ fun AnalyticsScreen(
     val totalIncome by viewModel.totalIncome.collectAsStateWithLifecycle()
     val totalExpenses by viewModel.totalExpenses.collectAsStateWithLifecycle()
     val balance by viewModel.balance.collectAsStateWithLifecycle()
-
-    val expensesByCategory by viewModel.expensesByCategory
-        .collectAsStateWithLifecycle()
-
-    val dailyExpenses by viewModel.dailyExpenses
-        .collectAsStateWithLifecycle()
+    val expensesByCategory by viewModel.expensesByCategory.collectAsStateWithLifecycle()
+    val dailyExpenses by viewModel.dailyExpenses.collectAsStateWithLifecycle()
 
     val sortedCategories = expensesByCategory
         .toList()
@@ -139,7 +142,6 @@ fun AnalyticsScreen(
             ),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            // Income and expenses
             item {
                 Row(
                     modifier = Modifier.fillMaxWidth(),
@@ -163,17 +165,14 @@ fun AnalyticsScreen(
                 }
             }
 
-            // Current balance
             item {
                 BalanceCard(balance = balance)
             }
 
-            // 7-day spending trend
             item {
                 SpendingTrendCard(dailyExpenses = dailyExpenses)
             }
 
-            // Circular category chart
             item {
                 Card(
                     modifier = Modifier.fillMaxWidth(),
@@ -193,13 +192,13 @@ fun AnalyticsScreen(
                                 modifier = Modifier
                                     .size(44.dp)
                                     .clip(RoundedCornerShape(14.dp))
-                                    .background(Color(0xFF1E3A5F)),
+                                    .background(AnalyticsLightBlue),
                                 contentAlignment = Alignment.Center
                             ) {
                                 Icon(
                                     imageVector = Icons.Default.BarChart,
                                     contentDescription = null,
-                                    tint = AnalyticsBlue
+                                    tint = AnalyticsBlueDark
                                 )
                             }
 
@@ -234,7 +233,6 @@ fun AnalyticsScreen(
                 }
             }
 
-            // Category breakdown
             if (sortedCategories.isNotEmpty()) {
                 item {
                     Text(
@@ -312,7 +310,7 @@ private fun SpendingTrendCard(
                             text = when {
                                 amount <= 0L -> "—"
                                 amount >= 1000L ->
-                                    "₹${"%.1f".format(amount / 1000.0)}k"
+                                    "₹${"%.1f".format(Locale.getDefault(), amount / 1000.0)}k"
                                 else -> "₹$amount"
                             },
                             style = MaterialTheme.typography.labelSmall,
@@ -322,9 +320,9 @@ private fun SpendingTrendCard(
 
                         Spacer(Modifier.height(6.dp))
 
-                        val barHeight = (
-                                amount.toFloat() / maxAmount.toFloat()
-                                ).coerceIn(0f, 1f) * 95f
+                        val barHeight =
+                            (amount.toFloat() / maxAmount.toFloat())
+                                .coerceIn(0f, 1f) * 95f
 
                         Box(
                             modifier = Modifier
@@ -361,7 +359,8 @@ private fun SpendingTrendCard(
                         Text(
                             text = day,
                             style = MaterialTheme.typography.labelSmall,
-                            color = AnalyticsMuted
+                            color = AnalyticsMuted,
+                            maxLines = 1
                         )
                     }
                 }
@@ -383,16 +382,13 @@ private fun DonutChart(
         horizontalArrangement = Arrangement.spacedBy(12.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        // Circular chart with total in the centre
         Box(
             modifier = Modifier
                 .weight(1.1f)
                 .size(180.dp),
             contentAlignment = Alignment.Center
         ) {
-            Canvas(
-                modifier = Modifier.fillMaxSize()
-            ) {
+            Canvas(modifier = Modifier.fillMaxSize()) {
                 val strokeWidth = 22.dp.toPx()
                 val diameter = size.minDimension - strokeWidth
 
@@ -444,7 +440,6 @@ private fun DonutChart(
             }
         }
 
-        // Category legend with amounts and percentages
         Column(
             modifier = Modifier.weight(1f),
             verticalArrangement = Arrangement.spacedBy(12.dp)
@@ -490,7 +485,7 @@ private fun DonutChart(
                         )
 
                         Text(
-                            text = "${"%.0f".format(percentage)}%",
+                            text = "${"%.0f".format(Locale.getDefault(), percentage)}%",
                             color = AnalyticsMuted,
                             style = MaterialTheme.typography.labelSmall
                         )
@@ -637,12 +632,12 @@ private fun CategoryExpenseItem(
                 modifier = Modifier
                     .size(44.dp)
                     .clip(RoundedCornerShape(14.dp))
-                    .background(Color(0xFF1E3A5F)),
+                    .background(AnalyticsLightBlue),
                 contentAlignment = Alignment.Center
             ) {
                 Text(
                     text = category.firstOrNull()?.uppercase() ?: "?",
-                    color = AnalyticsBlue,
+                    color = AnalyticsBlueDark,
                     fontWeight = FontWeight.Bold,
                     style = MaterialTheme.typography.titleMedium
                 )

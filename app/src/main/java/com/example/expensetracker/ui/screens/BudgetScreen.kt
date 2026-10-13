@@ -61,14 +61,17 @@ import java.util.Locale
 import kotlin.math.abs
 import kotlin.math.roundToInt
 
-private val BudgetBackground = Color(0xFF0B1020)
-private val BudgetCardBackground = Color(0xFF171E32)
-private val BudgetPurple = Color(0xFF9B8AFB)
-private val BudgetGreen = Color(0xFF4ADE80)
-private val BudgetAmber = Color(0xFFFBBF24)
-private val BudgetRed = Color(0xFFF87171)
-private val BudgetMuted = Color(0xFFADB7CC)
-private val BudgetWhite = Color(0xFFF8FAFC)
+// Baby-blue + white theme
+private val BudgetBackground = Color(0xFFF3F8FC)
+private val BudgetCardBackground = Color(0xFFFFFFFF)
+private val BudgetPurple = Color(0xFF5AA9E6)
+private val BudgetGreen = Color(0xFF219A75)
+private val BudgetAmber = Color(0xFFE6A23C)
+private val BudgetRed = Color(0xFFE16D75)
+private val BudgetMuted = Color(0xFF71849A)
+private val BudgetWhite = Color(0xFF243B53)
+private val BudgetBorder = Color(0xFFE0EAF3)
+private val BudgetTrack = Color(0xFFE8EFF6)
 
 private fun formatRupees(amount: Long): String {
     return NumberFormat.getCurrencyInstance(Locale("en", "IN"))
@@ -97,9 +100,11 @@ fun BudgetScreen(
     val currentMonth = currentMonthCalendar.get(Calendar.MONTH) + 1
     val currentYear = currentMonthCalendar.get(Calendar.YEAR)
 
-    val previousMonthCalendar = (currentMonthCalendar.clone() as Calendar).apply {
-        add(Calendar.MONTH, -1)
-    }
+    val previousMonthCalendar =
+        (currentMonthCalendar.clone() as Calendar).apply {
+            add(Calendar.MONTH, -1)
+        }
+
     val previousMonth = previousMonthCalendar.get(Calendar.MONTH) + 1
     val previousYear = previousMonthCalendar.get(Calendar.YEAR)
 
@@ -144,23 +149,9 @@ fun BudgetScreen(
             .sumOf { it.amount }
     }
 
-    fun previousSpentForCategory(category: String): Long {
-        return previousMonthExpenses
-            .filter { it.category == category }
-            .sumOf { it.amount }
-    }
-
-    /*
-     * Compare every category that appears in either month.
-     * If last month's spending was zero, a percentage cannot
-     * be calculated meaningfully, so we show a separate message.
-     */
     val spendingComparisons = remember(
-        expenses,
-        currentMonth,
-        currentYear,
-        previousMonth,
-        previousYear
+        currentMonthExpenses,
+        previousMonthExpenses
     ) {
         val currentByCategory = currentMonthExpenses
             .groupBy { it.category }
@@ -184,8 +175,12 @@ fun BudgetScreen(
                     null
                 } else {
                     val change = if (previous > 0L) {
-                        (((current.toDouble() - previous.toDouble()) /
-                                previous.toDouble()) * 100.0).roundToInt()
+                        (
+                                (
+                                        (current.toDouble() - previous.toDouble()) /
+                                                previous.toDouble()
+                                        ) * 100.0
+                                ).roundToInt()
                     } else {
                         null
                     }
@@ -276,7 +271,7 @@ fun BudgetScreen(
                 shape = RoundedCornerShape(16.dp),
                 colors = ButtonDefaults.buttonColors(
                     containerColor = BudgetPurple,
-                    contentColor = BudgetBackground
+                    contentColor = Color.White
                 )
             ) {
                 Icon(
@@ -432,7 +427,8 @@ private fun MonthComparisonCard(
         shape = RoundedCornerShape(22.dp),
         colors = CardDefaults.cardColors(
             containerColor = BudgetCardBackground
-        )
+        ),
+        border = BorderStroke(1.dp, BudgetBorder)
     ) {
         Column(
             modifier = Modifier.padding(18.dp),
@@ -485,6 +481,7 @@ private fun SpendingComparisonRow(
 
     val message: String
     val messageColor: Color
+
     val icon = when {
         change == null && comparison.currentSpent > 0L ->
             Icons.Default.TrendingUp
@@ -500,8 +497,9 @@ private fun SpendingComparisonRow(
 
     when {
         comparison.previousSpent == 0L && comparison.currentSpent > 0L -> {
-            message = "${comparison.category}: ${formatRupees(comparison.currentSpent)} " +
-                    "spent this month; no spending last month."
+            message = "${comparison.category}: " +
+                    "${formatRupees(comparison.currentSpent)} spent this month; " +
+                    "no spending last month."
             messageColor = BudgetAmber
         }
 
@@ -555,6 +553,7 @@ private fun BudgetOverviewCard(
     }
 
     val isOverBudget = totalSpent > totalBudget
+
     val progressColor = when {
         isOverBudget -> BudgetRed
         progress >= 0.8f -> BudgetAmber
@@ -566,7 +565,8 @@ private fun BudgetOverviewCard(
         shape = RoundedCornerShape(24.dp),
         colors = CardDefaults.cardColors(
             containerColor = BudgetCardBackground
-        )
+        ),
+        border = BorderStroke(1.dp, BudgetBorder)
     ) {
         Column(
             modifier = Modifier.padding(20.dp),
@@ -598,7 +598,7 @@ private fun BudgetOverviewCard(
                     .fillMaxWidth()
                     .height(8.dp),
                 color = progressColor,
-                trackColor = Color(0xFF303950)
+                trackColor = BudgetTrack
             )
 
             Row(
@@ -657,7 +657,8 @@ private fun BudgetInsightsCard(
         shape = RoundedCornerShape(22.dp),
         colors = CardDefaults.cardColors(
             containerColor = BudgetCardBackground
-        )
+        ),
+        border = BorderStroke(1.dp, BudgetBorder)
     ) {
         Column(
             modifier = Modifier.padding(18.dp),
@@ -755,7 +756,8 @@ private fun SmartSpendingInsightsCard(
         shape = RoundedCornerShape(22.dp),
         colors = CardDefaults.cardColors(
             containerColor = BudgetCardBackground
-        )
+        ),
+        border = BorderStroke(1.dp, BudgetBorder)
     ) {
         Column(
             modifier = Modifier.padding(18.dp),
@@ -856,7 +858,7 @@ private fun BudgetCard(
         ),
         border = BorderStroke(
             width = 1.dp,
-            color = Color(0xFF29334B)
+            color = BudgetBorder
         )
     ) {
         Column(
@@ -921,7 +923,7 @@ private fun BudgetCard(
                     .fillMaxWidth()
                     .height(7.dp),
                 color = progressColor,
-                trackColor = Color(0xFF303950)
+                trackColor = BudgetTrack
             )
 
             Text(
@@ -949,7 +951,8 @@ private fun EmptyBudgetCard(
         shape = RoundedCornerShape(20.dp),
         colors = CardDefaults.cardColors(
             containerColor = BudgetCardBackground
-        )
+        ),
+        border = BorderStroke(1.dp, BudgetBorder)
     ) {
         Column(
             modifier = Modifier
@@ -977,7 +980,14 @@ private fun EmptyBudgetCard(
                 style = MaterialTheme.typography.bodyMedium
             )
 
-            OutlinedButton(onClick = onAddBudget) {
+            Button(
+                onClick = onAddBudget,
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = BudgetPurple,
+                    contentColor = Color.White
+                ),
+                shape = RoundedCornerShape(14.dp)
+            ) {
                 Text("Create your first budget")
             }
         }
