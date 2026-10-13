@@ -1,9 +1,12 @@
+
 package com.example.expensetracker.ui.screens
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -18,7 +21,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.BarChart
-import androidx.compose.material.icons.filled. TrendingDown
+import androidx.compose.material.icons.filled.TrendingDown
 import androidx.compose.material.icons.filled.TrendingUp
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -44,11 +47,14 @@ import com.patrykandpatrick.vico.compose.cartesian.rememberCartesianChart
 import com.patrykandpatrick.vico.core.cartesian.data.CartesianChartModelProducer
 import com.patrykandpatrick.vico.core.cartesian.data.columnSeries
 
-private val IncomeGreen = Color(0xFF16A34A)
-private val IncomeGreenLight = Color(0xFFDCFCE7)
-
-private val ExpenseRed = Color(0xFFDC2626)
-private val ExpenseRedLight = Color(0xFFFEE2E2)
+private val AnalyticsBackground = Color(0xFF0B1120)
+private val AnalyticsCard = Color(0xFF151F32)
+private val AnalyticsBorder = Color(0xFF29364B)
+private val AnalyticsText = Color(0xFFF8FAFC)
+private val AnalyticsMuted = Color(0xFF94A3B8)
+private val AnalyticsBlue = Color(0xFF60A5FA)
+private val AnalyticsGreen = Color(0xFF4ADE80)
+private val AnalyticsRed = Color(0xFFF87171)
 
 @Composable
 fun AnalyticsScreen(
@@ -67,13 +73,9 @@ fun AnalyticsScreen(
     }
 
     LaunchedEffect(expensesByCategory) {
-
         if (expensesByCategory.isNotEmpty()) {
-
             chartModelProducer.runTransaction {
-
                 columnSeries {
-
                     series(
                         expensesByCategory
                             .toList()
@@ -88,9 +90,8 @@ fun AnalyticsScreen(
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .background(MaterialTheme.colorScheme.background)
+            .background(AnalyticsBackground)
     ) {
-
         // Header
         Row(
             modifier = Modifier
@@ -98,66 +99,58 @@ fun AnalyticsScreen(
                 .padding(
                     start = 12.dp,
                     end = 20.dp,
-                    top = 12.dp,
-                    bottom = 12.dp
+                    top = 16.dp,
+                    bottom = 16.dp
                 ),
             verticalAlignment = Alignment.CenterVertically
         ) {
-
-            IconButton(
-                onClick = onBack
-            ) {
+            IconButton(onClick = onBack) {
                 Icon(
                     imageVector = Icons.Default.ArrowBack,
-                    contentDescription = "Back"
+                    contentDescription = "Back",
+                    tint = AnalyticsText
                 )
             }
 
-            Spacer(
-                modifier = Modifier.size(4.dp)
-            )
+            Spacer(Modifier.size(8.dp))
 
             Column {
-
                 Text(
                     text = "Analytics",
                     style = MaterialTheme.typography.headlineMedium,
-                    fontWeight = FontWeight.Bold
+                    fontWeight = FontWeight.Bold,
+                    color = AnalyticsText
                 )
 
                 Text(
                     text = "Understand your spending",
                     style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                    color = AnalyticsMuted
                 )
             }
         }
 
-        // Scrollable content
         LazyColumn(
             modifier = Modifier.fillMaxSize(),
-            contentPadding = androidx.compose.foundation.layout.PaddingValues(
+            contentPadding = PaddingValues(
                 start = 20.dp,
                 end = 20.dp,
-                bottom = 24.dp
+                top = 4.dp,
+                bottom = 28.dp
             ),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-
-            // Summary cards
+            // Income and expenses
             item {
-
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.spacedBy(12.dp)
                 ) {
-
                     AnalyticsCard(
                         title = "Income",
                         amount = totalIncome,
                         icon = Icons.Default.TrendingUp,
-                        iconColor = IncomeGreen,
-                        iconBackground = IncomeGreenLight,
+                        iconColor = AnalyticsGreen,
                         modifier = Modifier.weight(1f)
                     )
 
@@ -165,8 +158,7 @@ fun AnalyticsScreen(
                         title = "Expenses",
                         amount = totalExpenses,
                         icon = Icons.Default.TrendingDown,
-                        iconColor = ExpenseRed,
-                        iconBackground = ExpenseRedLight,
+                        iconColor = AnalyticsRed,
                         modifier = Modifier.weight(1f)
                     )
                 }
@@ -174,77 +166,60 @@ fun AnalyticsScreen(
 
             // Balance
             item {
-
-                BalanceCard(
-                    balance = balance
-                )
+                BalanceCard(balance = balance)
             }
 
-            // Chart section
+            // Chart
             item {
-
                 Card(
                     modifier = Modifier.fillMaxWidth(),
-                    shape = RoundedCornerShape(20.dp),
+                    shape = RoundedCornerShape(22.dp),
                     colors = CardDefaults.cardColors(
-                        containerColor = MaterialTheme.colorScheme.surface
+                        containerColor = AnalyticsCard
                     ),
-                    elevation = CardDefaults.cardElevation(
-                        defaultElevation = 2.dp
-                    )
+                    border = BorderStroke(1.dp, AnalyticsBorder)
                 ) {
-
                     Column(
                         modifier = Modifier.padding(18.dp)
                     ) {
-
                         Row(
                             verticalAlignment = Alignment.CenterVertically
                         ) {
-
                             Box(
                                 modifier = Modifier
-                                    .size(42.dp)
-                                    .clip(CircleShape)
-                                    .background(
-                                        MaterialTheme.colorScheme.primaryContainer
-                                    ),
+                                    .size(44.dp)
+                                    .clip(RoundedCornerShape(14.dp))
+                                    .background(Color(0xFF1E3A5F)),
                                 contentAlignment = Alignment.Center
                             ) {
-
                                 Icon(
                                     imageVector = Icons.Default.BarChart,
                                     contentDescription = null,
-                                    tint = MaterialTheme.colorScheme.primary
+                                    tint = AnalyticsBlue
                                 )
                             }
 
-                            Spacer(
-                                modifier = Modifier.size(12.dp)
-                            )
+                            Spacer(Modifier.size(12.dp))
 
                             Column {
-
                                 Text(
-                                    text = "Expenses by Category",
-                                    style = MaterialTheme.typography.titleLarge,
-                                    fontWeight = FontWeight.Bold
+                                    text = "Expenses by category",
+                                    style = MaterialTheme.typography.titleMedium,
+                                    fontWeight = FontWeight.Bold,
+                                    color = AnalyticsText
                                 )
 
                                 Text(
-                                    text = "Where your money is going",
-                                    style = MaterialTheme.typography.bodyMedium,
-                                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                                    text = "See where your money goes",
+                                    style = MaterialTheme.typography.bodySmall,
+                                    color = AnalyticsMuted
                                 )
                             }
                         }
 
-                        Spacer(
-                            modifier = Modifier.height(20.dp)
-                        )
+                        Spacer(Modifier.height(20.dp))
 
                         if (expensesByCategory.isNotEmpty()) {
-
                             CartesianChartHost(
                                 chart = rememberCartesianChart(
                                     rememberColumnCartesianLayer()
@@ -252,11 +227,9 @@ fun AnalyticsScreen(
                                 modelProducer = chartModelProducer,
                                 modifier = Modifier
                                     .fillMaxWidth()
-                                    .height(250.dp)
+                                    .height(230.dp)
                             )
-
                         } else {
-
                             EmptyAnalyticsState()
                         }
                     }
@@ -265,22 +238,21 @@ fun AnalyticsScreen(
 
             // Category breakdown
             if (expensesByCategory.isNotEmpty()) {
-
                 item {
-
                     Text(
-                        text = "Category Breakdown",
+                        text = "Category breakdown",
                         style = MaterialTheme.typography.titleLarge,
-                        fontWeight = FontWeight.Bold
+                        fontWeight = FontWeight.Bold,
+                        color = AnalyticsText
                     )
                 }
 
                 items(
                     items = expensesByCategory
                         .toList()
-                        .sortedByDescending { it.second }
+                        .sortedByDescending { it.second },
+                    key = { it.first }
                 ) { (category, amount) ->
-
                     CategoryExpenseItem(
                         category = category,
                         amount = amount
@@ -297,32 +269,26 @@ private fun AnalyticsCard(
     amount: Long,
     icon: androidx.compose.ui.graphics.vector.ImageVector,
     iconColor: Color,
-    iconBackground: Color,
     modifier: Modifier = Modifier
 ) {
     Card(
         modifier = modifier,
         shape = RoundedCornerShape(20.dp),
         colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surface
+            containerColor = AnalyticsCard
         ),
-        elevation = CardDefaults.cardElevation(
-            defaultElevation = 2.dp
-        )
+        border = BorderStroke(1.dp, AnalyticsBorder)
     ) {
-
         Column(
-            modifier = Modifier.padding(16.dp)
+            modifier = Modifier.padding(15.dp)
         ) {
-
             Box(
                 modifier = Modifier
-                    .size(40.dp)
-                    .clip(CircleShape)
-                    .background(iconBackground),
+                    .size(42.dp)
+                    .clip(RoundedCornerShape(14.dp))
+                    .background(iconColor.copy(alpha = 0.12f)),
                 contentAlignment = Alignment.Center
             ) {
-
                 Icon(
                     imageVector = icon,
                     contentDescription = null,
@@ -330,90 +296,81 @@ private fun AnalyticsCard(
                 )
             }
 
-            Spacer(
-                modifier = Modifier.height(12.dp)
-            )
+            Spacer(Modifier.height(14.dp))
 
             Text(
                 text = title,
                 style = MaterialTheme.typography.labelLarge,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
+                color = AnalyticsMuted
             )
 
-            Spacer(
-                modifier = Modifier.height(4.dp)
-            )
+            Spacer(Modifier.height(5.dp))
 
             Text(
                 text = "₹$amount",
                 style = MaterialTheme.typography.titleLarge,
-                fontWeight = FontWeight.Bold
+                fontWeight = FontWeight.Bold,
+                color = AnalyticsText
             )
         }
     }
 }
 
 @Composable
-private fun BalanceCard(
-    balance: Long
-) {
+private fun BalanceCard(balance: Long) {
     val isPositive = balance >= 0
-
-    val color =
-        if (isPositive) {
-            IncomeGreen
-        } else {
-            ExpenseRed
-        }
-
-    val background =
-        if (isPositive) {
-            IncomeGreenLight
-        } else {
-            ExpenseRedLight
-        }
+    val balanceColor = if (isPositive) AnalyticsGreen else AnalyticsRed
 
     Card(
         modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(20.dp),
+        shape = RoundedCornerShape(22.dp),
         colors = CardDefaults.cardColors(
-            containerColor = background
-        )
+            containerColor = AnalyticsCard
+        ),
+        border = BorderStroke(1.dp, AnalyticsBorder)
     ) {
-
         Column(
             modifier = Modifier.padding(20.dp)
         ) {
+            Row(
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Box(
+                    modifier = Modifier
+                        .size(10.dp)
+                        .clip(CircleShape)
+                        .background(balanceColor)
+                )
 
-            Text(
-                text = "Current Balance",
-                style = MaterialTheme.typography.labelLarge,
-                color = color
-            )
+                Spacer(Modifier.size(9.dp))
 
-            Spacer(
-                modifier = Modifier.height(6.dp)
-            )
+                Text(
+                    text = "CURRENT BALANCE",
+                    style = MaterialTheme.typography.labelMedium,
+                    color = AnalyticsMuted,
+                    fontWeight = FontWeight.Bold
+                )
+            }
+
+            Spacer(Modifier.height(12.dp))
 
             Text(
                 text = "₹$balance",
                 style = MaterialTheme.typography.headlineMedium,
                 fontWeight = FontWeight.Bold,
-                color = color
+                color = balanceColor
             )
 
-            Spacer(
-                modifier = Modifier.height(4.dp)
-            )
+            Spacer(Modifier.height(6.dp))
 
             Text(
                 text = if (isPositive) {
-                    "You're currently in a positive balance."
+                    "Your income is keeping your balance positive."
                 } else {
-                    "Your expenses are higher than your income."
+                    "Your recorded expenses exceed your income."
                 },
                 style = MaterialTheme.typography.bodyMedium,
-                color = color
+                color = AnalyticsMuted
             )
         }
     }
@@ -426,57 +383,48 @@ private fun CategoryExpenseItem(
 ) {
     Card(
         modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(16.dp),
+        shape = RoundedCornerShape(18.dp),
         colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surface
+            containerColor = AnalyticsCard
         ),
-        elevation = CardDefaults.cardElevation(
-            defaultElevation = 1.dp
-        )
+        border = BorderStroke(1.dp, AnalyticsBorder)
     ) {
-
         Row(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(16.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-
             Box(
                 modifier = Modifier
-                    .size(42.dp)
-                    .clip(CircleShape)
-                    .background(
-                        MaterialTheme.colorScheme.primaryContainer
-                    ),
+                    .size(44.dp)
+                    .clip(RoundedCornerShape(14.dp))
+                    .background(Color(0xFF1E3A5F)),
                 contentAlignment = Alignment.Center
             ) {
-
                 Text(
-                    text = category
-                        .firstOrNull()
-                        ?.uppercase()
-                        ?: "?",
-                    color = MaterialTheme.colorScheme.primary,
-                    fontWeight = FontWeight.Bold
+                    text = category.firstOrNull()?.uppercase() ?: "?",
+                    color = AnalyticsBlue,
+                    fontWeight = FontWeight.Bold,
+                    style = MaterialTheme.typography.titleMedium
                 )
             }
 
-            Spacer(
-                modifier = Modifier.size(12.dp)
-            )
+            Spacer(Modifier.size(12.dp))
 
             Text(
                 text = category,
                 modifier = Modifier.weight(1f),
                 style = MaterialTheme.typography.titleMedium,
-                fontWeight = FontWeight.SemiBold
+                fontWeight = FontWeight.SemiBold,
+                color = AnalyticsText
             )
 
             Text(
                 text = "₹$amount",
                 style = MaterialTheme.typography.titleMedium,
-                fontWeight = FontWeight.Bold
+                fontWeight = FontWeight.Bold,
+                color = AnalyticsText
             )
         }
     }
@@ -490,36 +438,31 @@ private fun EmptyAnalyticsState() {
             .height(180.dp),
         contentAlignment = Alignment.Center
     ) {
-
         Column(
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-
             Icon(
                 imageVector = Icons.Default.BarChart,
                 contentDescription = null,
-                modifier = Modifier.size(40.dp),
-                tint = MaterialTheme.colorScheme.onSurfaceVariant
+                modifier = Modifier.size(42.dp),
+                tint = AnalyticsMuted
             )
 
-            Spacer(
-                modifier = Modifier.height(10.dp)
-            )
+            Spacer(Modifier.height(12.dp))
 
             Text(
                 text = "No expense data yet",
                 style = MaterialTheme.typography.titleMedium,
-                fontWeight = FontWeight.SemiBold
+                fontWeight = FontWeight.SemiBold,
+                color = AnalyticsText
             )
 
-            Spacer(
-                modifier = Modifier.height(4.dp)
-            )
+            Spacer(Modifier.height(5.dp))
 
             Text(
                 text = "Add some expenses to see your insights.",
                 style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
+                color = AnalyticsMuted
             )
         }
     }

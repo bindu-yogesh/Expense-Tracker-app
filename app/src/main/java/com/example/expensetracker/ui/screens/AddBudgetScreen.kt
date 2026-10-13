@@ -1,6 +1,7 @@
 
 package com.example.expensetracker.ui.screens
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -10,12 +11,16 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.Category
+import androidx.compose.material.icons.filled.Payments
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExposedDropdownMenuBox
@@ -38,6 +43,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -48,11 +54,12 @@ import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.launch
 import java.util.Calendar
 
-private val BudgetText = Color(0xFF0F172A)
-private val BudgetBackground = Color(0xFFF8FAFC)
-private val BudgetFieldBackground = Color.White
-private val BudgetBorder = Color(0xFF64748B)
-private val BudgetBlue = Color(0xFF2563EB)
+private val AddBudgetBackground = Color(0xFF0B1120)
+private val AddBudgetCard = Color(0xFF151F32)
+private val AddBudgetBorder = Color(0xFF29364B)
+private val AddBudgetText = Color(0xFFF8FAFC)
+private val AddBudgetMuted = Color(0xFF94A3B8)
+private val AddBudgetBlue = Color(0xFF60A5FA)
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -88,144 +95,189 @@ fun AddBudgetScreen(
     val currentYear = calendar.get(Calendar.YEAR)
 
     Scaffold(
-        containerColor = BudgetBackground,
+        containerColor = AddBudgetBackground,
         topBar = {
             TopAppBar(
                 title = {
-                    Text(
-                        text = "Add Budget",
-                        color = BudgetText
-                    )
+                    Column {
+                        Text(
+                            text = "Add Budget",
+                            color = AddBudgetText,
+                            fontWeight = FontWeight.Bold
+                        )
+
+                        Text(
+                            text = "Plan your monthly spending",
+                            color = AddBudgetMuted,
+                            fontSize = 12.sp
+                        )
+                    }
                 },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
                         Icon(
                             imageVector = Icons.Default.ArrowBack,
                             contentDescription = "Back",
-                            tint = BudgetText
+                            tint = AddBudgetText
                         )
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = BudgetBackground,
-                    titleContentColor = BudgetText,
-                    navigationIconContentColor = BudgetText
+                    containerColor = AddBudgetBackground,
+                    titleContentColor = AddBudgetText,
+                    navigationIconContentColor = AddBudgetText
                 )
             )
         }
     ) { paddingValues ->
-
         Column(
             modifier = Modifier
                 .fillMaxSize()
+                .background(AddBudgetBackground)
                 .padding(paddingValues)
                 .imePadding()
                 .verticalScroll(rememberScrollState())
                 .padding(20.dp),
-            verticalArrangement = Arrangement.spacedBy(16.dp)
+            verticalArrangement = Arrangement.spacedBy(18.dp)
         ) {
-            Text(
-                text = "Set a monthly spending limit",
-                color = BudgetText,
-                fontSize = 18.sp,
-                style = MaterialTheme.typography.titleMedium
-            )
-
-            ExposedDropdownMenuBox(
-                expanded = categoryExpanded,
-                onExpandedChange = {
-                    categoryExpanded = !categoryExpanded
-                }
-            ) {
-                OutlinedTextField(
-                    value = selectedCategory,
-                    onValueChange = {},
-                    readOnly = true,
-                    label = {
-                        Text("Category")
-                    },
-                    trailingIcon = {
-                        ExposedDropdownMenuDefaults.TrailingIcon(
-                            expanded = categoryExpanded
-                        )
-                    },
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .menuAnchor(),
-                    colors = OutlinedTextFieldDefaults.colors(
-                        focusedTextColor = BudgetText,
-                        unfocusedTextColor = BudgetText,
-                        focusedLabelColor = BudgetText,
-                        unfocusedLabelColor = BudgetText,
-                        focusedBorderColor = BudgetBlue,
-                        unfocusedBorderColor = BudgetBorder,
-                        focusedContainerColor = BudgetFieldBackground,
-                        unfocusedContainerColor = BudgetFieldBackground,
-                        focusedTrailingIconColor = BudgetText,
-                        unfocusedTrailingIconColor = BudgetText
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .background(
+                        AddBudgetCard,
+                        RoundedCornerShape(22.dp)
                     )
+                    .padding(20.dp)
+            ) {
+                Text(
+                    text = "Create a budget",
+                    color = AddBudgetText,
+                    style = MaterialTheme.typography.titleLarge,
+                    fontWeight = FontWeight.Bold
                 )
 
-                ExposedDropdownMenu(
+                Spacer(Modifier.height(6.dp))
+
+                Text(
+                    text = "Choose a category and set how much you want to spend this month.",
+                    color = AddBudgetMuted,
+                    style = MaterialTheme.typography.bodyMedium
+                )
+            }
+
+            Column(
+                verticalArrangement = Arrangement.spacedBy(10.dp)
+            ) {
+                Text(
+                    text = "CATEGORY",
+                    color = AddBudgetMuted,
+                    style = MaterialTheme.typography.labelMedium,
+                    fontWeight = FontWeight.Bold
+                )
+
+                ExposedDropdownMenuBox(
                     expanded = categoryExpanded,
-                    onDismissRequest = {
-                        categoryExpanded = false
+                    onExpandedChange = {
+                        categoryExpanded = !categoryExpanded
                     }
                 ) {
-                    expenseCategories.forEach { category ->
-                        DropdownMenuItem(
-                            text = {
-                                Text(
-                                    text = category,
-                                    color = BudgetText
-                                )
-                            },
-                            onClick = {
-                                selectedCategory = category
-                                categoryExpanded = false
-                            }
-                        )
+                    OutlinedTextField(
+                        value = selectedCategory,
+                        onValueChange = {},
+                        readOnly = true,
+                        singleLine = true,
+                        leadingIcon = {
+                            Icon(
+                                imageVector = Icons.Default.Category,
+                                contentDescription = null,
+                                tint = AddBudgetBlue
+                            )
+                        },
+                        trailingIcon = {
+                            ExposedDropdownMenuDefaults.TrailingIcon(
+                                expanded = categoryExpanded
+                            )
+                        },
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .menuAnchor(),
+                        shape = RoundedCornerShape(16.dp),
+                        colors = budgetFieldColors()
+                    )
+
+                    ExposedDropdownMenu(
+                        expanded = categoryExpanded,
+                        onDismissRequest = {
+                            categoryExpanded = false
+                        },
+                        modifier = Modifier.background(AddBudgetCard)
+                    ) {
+                        expenseCategories.forEach { category ->
+                            DropdownMenuItem(
+                                text = {
+                                    Text(
+                                        text = category,
+                                        color = AddBudgetText
+                                    )
+                                },
+                                onClick = {
+                                    selectedCategory = category
+                                    categoryExpanded = false
+                                }
+                            )
+                        }
                     }
                 }
             }
 
-            OutlinedTextField(
-                value = amountText,
-                onValueChange = { input ->
-                    amountText = input.filter { it.isDigit() }
-                },
-                label = {
-                    Text("Monthly Budget")
-                },
-                prefix = {
-                    Text("₹")
-                },
-                placeholder = {
-                    Text("Enter amount")
-                },
-                singleLine = true,
-                keyboardOptions = KeyboardOptions(
-                    keyboardType = KeyboardType.Number
-                ),
-                modifier = Modifier.fillMaxWidth(),
-                colors = OutlinedTextFieldDefaults.colors(
-                    focusedTextColor = BudgetText,
-                    unfocusedTextColor = BudgetText,
-                    focusedLabelColor = BudgetText,
-                    unfocusedLabelColor = BudgetText,
-                    focusedPlaceholderColor = BudgetBorder,
-                    unfocusedPlaceholderColor = BudgetBorder,
-                    focusedBorderColor = BudgetBlue,
-                    unfocusedBorderColor = BudgetBorder,
-                    focusedContainerColor = BudgetFieldBackground,
-                    unfocusedContainerColor = BudgetFieldBackground,
-                    focusedPrefixColor = BudgetText,
-                    unfocusedPrefixColor = BudgetText,
-                    cursorColor = BudgetBlue
+            Column(
+                verticalArrangement = Arrangement.spacedBy(10.dp)
+            ) {
+                Text(
+                    text = "MONTHLY LIMIT",
+                    color = AddBudgetMuted,
+                    style = MaterialTheme.typography.labelMedium,
+                    fontWeight = FontWeight.Bold
                 )
-            )
 
-            Spacer(modifier = Modifier.height(4.dp))
+                OutlinedTextField(
+                    value = amountText,
+                    onValueChange = { input ->
+                        amountText = input.filter { it.isDigit() }
+                    },
+                    label = {
+                        Text("Budget amount")
+                    },
+                    placeholder = {
+                        Text("Enter amount")
+                    },
+                    leadingIcon = {
+                        Icon(
+                            imageVector = Icons.Default.Payments,
+                            contentDescription = null,
+                            tint = AddBudgetBlue
+                        )
+                    },
+                    prefix = {
+                        Text("₹")
+                    },
+                    singleLine = true,
+                    keyboardOptions = KeyboardOptions(
+                        keyboardType = KeyboardType.Number
+                    ),
+                    modifier = Modifier.fillMaxWidth(),
+                    shape = RoundedCornerShape(16.dp),
+                    colors = budgetFieldColors()
+                )
+
+                Text(
+                    text = "Set a realistic limit that works for your monthly expenses.",
+                    color = AddBudgetMuted,
+                    style = MaterialTheme.typography.bodySmall
+                )
+            }
+
+            Spacer(Modifier.height(4.dp))
 
             Button(
                 onClick = {
@@ -236,8 +288,7 @@ fun AddBudgetScreen(
                     val amount = amountText.toLongOrNull()
 
                     if (amount == null || amount <= 0L) {
-                        errorMessage =
-                            "Please enter a valid budget amount."
+                        errorMessage = "Please enter a valid budget amount."
                         return@Button
                     }
 
@@ -279,16 +330,24 @@ fun AddBudgetScreen(
                     }
                 },
                 enabled = !isSaving,
-                modifier = Modifier.fillMaxWidth()
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(54.dp),
+                shape = RoundedCornerShape(16.dp),
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = Color(0xFF2563EB),
+                    contentColor = Color.White,
+                    disabledContainerColor = Color(0xFF334155),
+                    disabledContentColor = AddBudgetMuted
+                )
             ) {
                 Text(
-                    text = if (isSaving) {
-                        "Saving..."
-                    } else {
-                        "Save Budget"
-                    }
+                    text = if (isSaving) "Saving..." else "Save Budget",
+                    fontWeight = FontWeight.Bold
                 )
             }
+
+            Spacer(Modifier.height(12.dp))
         }
     }
 
@@ -300,13 +359,14 @@ fun AddBudgetScreen(
             title = {
                 Text(
                     text = "Budget not saved",
-                    color = BudgetText
+                    color = AddBudgetText,
+                    fontWeight = FontWeight.Bold
                 )
             },
             text = {
                 Text(
                     text = errorMessage.orEmpty(),
-                    color = BudgetText
+                    color = AddBudgetMuted
                 )
             },
             confirmButton = {
@@ -315,10 +375,34 @@ fun AddBudgetScreen(
                         errorMessage = null
                     }
                 ) {
-                    Text("OK")
+                    Text(
+                        text = "OK",
+                        color = AddBudgetBlue
+                    )
                 }
             },
-            containerColor = Color.White
+            containerColor = AddBudgetCard
         )
     }
 }
+
+@Composable
+private fun budgetFieldColors() = OutlinedTextFieldDefaults.colors(
+    focusedTextColor = AddBudgetText,
+    unfocusedTextColor = AddBudgetText,
+    focusedLabelColor = AddBudgetBlue,
+    unfocusedLabelColor = AddBudgetMuted,
+    focusedPlaceholderColor = AddBudgetMuted,
+    unfocusedPlaceholderColor = AddBudgetMuted,
+    focusedBorderColor = AddBudgetBlue,
+    unfocusedBorderColor = AddBudgetBorder,
+    focusedContainerColor = AddBudgetCard,
+    unfocusedContainerColor = AddBudgetCard,
+    focusedLeadingIconColor = AddBudgetBlue,
+    unfocusedLeadingIconColor = AddBudgetMuted,
+    focusedTrailingIconColor = AddBudgetBlue,
+    unfocusedTrailingIconColor = AddBudgetMuted,
+    focusedPrefixColor = AddBudgetText,
+    unfocusedPrefixColor = AddBudgetText,
+    cursorColor = AddBudgetBlue
+)

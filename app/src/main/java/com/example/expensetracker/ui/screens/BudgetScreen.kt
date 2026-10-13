@@ -1,6 +1,6 @@
-
 package com.example.expensetracker.ui.screens
-//import androidx.compose.material.icons.automirrored.filled.ArrowBack
+
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -54,18 +54,19 @@ import com.example.expensetracker.data.local.BudgetEntity
 import com.example.expensetracker.ui.theme.ExpenseRed
 import com.example.expensetracker.ui.theme.IncomeGreen
 import com.example.expensetracker.ui.theme.PrimaryBlue
-import com.example.expensetracker.ui.theme.PrimaryBlueLight
 import com.example.expensetracker.ui.theme.Teal
 import com.example.expensetracker.viewmodel.BudgetViewModel
 import com.example.expensetracker.viewmodel.ExpenseViewModel
 import java.util.Calendar
 import kotlin.math.abs
 
-private val ScreenBackground = Color(0xFFF8FAFC)
-private val CardBackground = Color.White
-private val MainText = Color(0xFF0F172A)
-private val SecondaryText = Color(0xFF475569)
-private val ProgressTrack = Color(0xFFE2E8F0)
+private val BudgetScreenBackground = Color(0xFF0B1120)
+private val BudgetCardBackground = Color(0xFF151F32)
+private val BudgetBorder = Color(0xFF29364B)
+private val BudgetMainText = Color(0xFFF8FAFC)
+private val BudgetSecondaryText = Color(0xFF94A3B8)
+private val BudgetProgressTrack = Color(0xFF29364B)
+private val BudgetBlueLight = Color(0xFF93C5FD)
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -113,7 +114,7 @@ fun BudgetScreen(
     val totalRemaining = totalBudget - totalSpent
 
     Scaffold(
-        containerColor = ScreenBackground,
+        containerColor = BudgetScreenBackground,
         topBar = {
             TopAppBar(
                 title = {
@@ -121,12 +122,13 @@ fun BudgetScreen(
                         Text(
                             text = "Budgets",
                             fontWeight = FontWeight.Bold,
-                            color = MainText
+                            color = BudgetMainText
                         )
+
                         Text(
                             text = "Monthly spending limits",
                             fontSize = 12.sp,
-                            color = SecondaryText
+                            color = BudgetSecondaryText
                         )
                     }
                 },
@@ -135,14 +137,14 @@ fun BudgetScreen(
                         Icon(
                             imageVector = Icons.Default.ArrowBack,
                             contentDescription = "Back",
-                            tint = MainText
+                            tint = BudgetMainText
                         )
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = ScreenBackground,
-                    titleContentColor = MainText,
-                    navigationIconContentColor = MainText
+                    containerColor = BudgetScreenBackground,
+                    titleContentColor = BudgetMainText,
+                    navigationIconContentColor = BudgetMainText
                 )
             )
         },
@@ -150,7 +152,8 @@ fun BudgetScreen(
             FloatingActionButton(
                 onClick = onAddBudget,
                 containerColor = PrimaryBlue,
-                contentColor = Color.White
+                contentColor = Color.White,
+                shape = RoundedCornerShape(18.dp)
             ) {
                 Icon(
                     imageVector = Icons.Default.Add,
@@ -162,7 +165,7 @@ fun BudgetScreen(
         LazyColumn(
             modifier = Modifier
                 .fillMaxSize()
-                .background(ScreenBackground)
+                .background(BudgetScreenBackground)
                 .padding(paddingValues),
             contentPadding = PaddingValues(
                 start = 16.dp,
@@ -181,7 +184,9 @@ fun BudgetScreen(
             }
 
             if (monthlyBudgetsState == null) {
-                // Loading: don't show the empty-budget message yet.
+                item {
+                    LoadingBudgetCard()
+                }
             } else if (monthlyBudgets.isEmpty()) {
                 item {
                     EmptyBudgetCard(onAddBudget = onAddBudget)
@@ -192,7 +197,7 @@ fun BudgetScreen(
                         text = "Category Budgets",
                         fontSize = 20.sp,
                         fontWeight = FontWeight.Bold,
-                        color = MainText
+                        color = BudgetMainText
                     )
                 }
 
@@ -218,9 +223,9 @@ fun BudgetScreen(
     budgetToDelete?.let { budget ->
         AlertDialog(
             onDismissRequest = { budgetToDelete = null },
-            containerColor = CardBackground,
-            titleContentColor = MainText,
-            textContentColor = SecondaryText,
+            containerColor = BudgetCardBackground,
+            titleContentColor = BudgetMainText,
+            textContentColor = BudgetSecondaryText,
             title = {
                 Text(
                     text = "Delete Budget?",
@@ -250,8 +255,8 @@ fun BudgetScreen(
                 Button(
                     onClick = { budgetToDelete = null },
                     colors = ButtonDefaults.buttonColors(
-                        containerColor = ProgressTrack,
-                        contentColor = MainText
+                        containerColor = BudgetBorder,
+                        contentColor = BudgetMainText
                     )
                 ) {
                     Text("Cancel")
@@ -274,58 +279,77 @@ private fun BudgetOverviewCard(
     }
 
     val isOverBudget = remaining < 0L
+    val statusColor = if (isOverBudget) {
+        Color(0xFFFFB4AB)
+    } else {
+        BudgetBlueLight
+    }
 
     Card(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(24.dp),
         colors = CardDefaults.cardColors(
-            containerColor = PrimaryBlue
+            containerColor = Color(0xFF17365D)
         ),
-        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
+        border = BorderStroke(1.dp, Color(0xFF285184))
     ) {
-        Column(modifier = Modifier.padding(20.dp)) {
+        Column(
+            modifier = Modifier.padding(20.dp)
+        ) {
             Text(
-                text = "This Month",
-                color = Color.White.copy(alpha = 0.85f),
-                fontSize = 14.sp
-            )
-
-            Spacer(modifier = Modifier.height(6.dp))
-
-            Text(
-                text = "₹$totalSpent spent",
-                color = Color.White,
-                fontSize = 28.sp,
+                text = "THIS MONTH",
+                color = Color(0xFFBFDBFE),
+                fontSize = 12.sp,
                 fontWeight = FontWeight.Bold
             )
 
-            Spacer(modifier = Modifier.height(16.dp))
+            Spacer(Modifier.height(8.dp))
+
+            Text(
+                text = "₹$totalSpent",
+                color = Color.White,
+                fontSize = 30.sp,
+                fontWeight = FontWeight.Bold
+            )
+
+            Text(
+                text = "spent so far",
+                color = Color(0xFFBFDBFE),
+                fontSize = 14.sp
+            )
+
+            Spacer(Modifier.height(20.dp))
 
             LinearProgressIndicator(
                 progress = { overallProgress },
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(8.dp)
+                    .height(9.dp)
                     .clip(CircleShape),
-                color = Color.White,
-                trackColor = Color.White.copy(alpha = 0.25f)
+                color = if (isOverBudget) {
+                    Color(0xFFFF8A80)
+                } else {
+                    Color(0xFF93C5FD)
+                },
+                trackColor = Color.White.copy(alpha = 0.18f)
             )
 
-            Spacer(modifier = Modifier.height(18.dp))
+            Spacer(Modifier.height(18.dp))
 
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
                 OverviewItem(
-                    title = "Budget",
+                    title = "Total budget",
                     value = "₹$totalBudget"
                 )
 
                 OverviewItem(
-                    title = if (isOverBudget) "Over Budget" else "Remaining",
+                    title = if (isOverBudget) "Over budget" else "Remaining",
                     value = "₹${abs(remaining)}",
-                    alignment = Alignment.End
+                    alignment = Alignment.End,
+                    valueColor = statusColor
                 )
             }
         }
@@ -336,18 +360,21 @@ private fun BudgetOverviewCard(
 private fun OverviewItem(
     title: String,
     value: String,
-    alignment: Alignment.Horizontal = Alignment.Start
+    alignment: Alignment.Horizontal = Alignment.Start,
+    valueColor: Color = Color.White
 ) {
     Column(horizontalAlignment = alignment) {
         Text(
             text = title,
-            color = Color.White.copy(alpha = 0.85f),
+            color = Color(0xFFBFDBFE),
             fontSize = 13.sp
         )
 
+        Spacer(Modifier.height(4.dp))
+
         Text(
             text = value,
-            color = Color.White,
+            color = valueColor,
             fontSize = 18.sp,
             fontWeight = FontWeight.Bold
         )
@@ -362,7 +389,6 @@ private fun BudgetCard(
     onDelete: () -> Unit
 ) {
     val remaining = budget.amount - spentAmount
-
     val progress = if (budget.amount > 0L) {
         spentAmount.toFloat() / budget.amount.toFloat()
     } else {
@@ -374,7 +400,7 @@ private fun BudgetCard(
 
     val accentColor = when {
         isOverBudget -> ExpenseRed
-        isNearLimit -> Teal
+        isNearLimit -> Color(0xFFFBBF24)
         else -> IncomeGreen
     }
 
@@ -388,11 +414,13 @@ private fun BudgetCard(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(22.dp),
         colors = CardDefaults.cardColors(
-            containerColor = CardBackground
+            containerColor = BudgetCardBackground
         ),
-        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+        border = BorderStroke(1.dp, BudgetBorder)
     ) {
-        Column(modifier = Modifier.padding(18.dp)) {
+        Column(
+            modifier = Modifier.padding(18.dp)
+        ) {
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 verticalAlignment = Alignment.CenterVertically
@@ -400,27 +428,31 @@ private fun BudgetCard(
                 Box(
                     modifier = Modifier
                         .size(46.dp)
-                        .clip(CircleShape)
-                        .background(accentColor),
+                        .clip(RoundedCornerShape(15.dp))
+                        .background(accentColor.copy(alpha = 0.14f)),
                     contentAlignment = Alignment.Center
                 ) {
                     Text(
                         text = budget.category.take(1).uppercase(),
-                        color = Color.White,
+                        color = accentColor,
                         fontWeight = FontWeight.Bold,
                         fontSize = 20.sp
                     )
                 }
 
-                Spacer(modifier = Modifier.size(12.dp))
+                Spacer(Modifier.size(12.dp))
 
-                Column(modifier = Modifier.weight(1f)) {
+                Column(
+                    modifier = Modifier.weight(1f)
+                ) {
                     Text(
                         text = budget.category,
                         fontSize = 17.sp,
                         fontWeight = FontWeight.Bold,
-                        color = MainText
+                        color = BudgetMainText
                     )
+
+                    Spacer(Modifier.height(3.dp))
 
                     Text(
                         text = statusText,
@@ -434,7 +466,7 @@ private fun BudgetCard(
                     Icon(
                         imageVector = Icons.Default.Edit,
                         contentDescription = "Edit Budget",
-                        tint = PrimaryBlue
+                        tint = BudgetBlueLight
                     )
                 }
 
@@ -442,12 +474,12 @@ private fun BudgetCard(
                     Icon(
                         imageVector = Icons.Default.Delete,
                         contentDescription = "Delete Budget",
-                        tint = ExpenseRed
+                        tint = Color(0xFFF87171)
                     )
                 }
             }
 
-            Spacer(modifier = Modifier.height(16.dp))
+            Spacer(Modifier.height(18.dp))
 
             Row(
                 modifier = Modifier.fillMaxWidth(),
@@ -457,14 +489,16 @@ private fun BudgetCard(
                     Text(
                         text = "Spent",
                         fontSize = 12.sp,
-                        color = SecondaryText
+                        color = BudgetSecondaryText
                     )
+
+                    Spacer(Modifier.height(4.dp))
 
                     Text(
                         text = "₹$spentAmount",
                         fontSize = 18.sp,
                         fontWeight = FontWeight.Bold,
-                        color = MainText
+                        color = BudgetMainText
                     )
                 }
 
@@ -472,8 +506,10 @@ private fun BudgetCard(
                     Text(
                         text = if (isOverBudget) "Over by" else "Remaining",
                         fontSize = 12.sp,
-                        color = SecondaryText
+                        color = BudgetSecondaryText
                     )
+
+                    Spacer(Modifier.height(4.dp))
 
                     Text(
                         text = "₹${abs(remaining)}",
@@ -484,24 +520,24 @@ private fun BudgetCard(
                 }
             }
 
-            Spacer(modifier = Modifier.height(12.dp))
+            Spacer(Modifier.height(14.dp))
 
             LinearProgressIndicator(
                 progress = { progress.coerceIn(0f, 1f) },
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(9.dp)
+                    .height(8.dp)
                     .clip(CircleShape),
                 color = accentColor,
-                trackColor = ProgressTrack
+                trackColor = BudgetProgressTrack
             )
 
-            Spacer(modifier = Modifier.height(8.dp))
+            Spacer(Modifier.height(9.dp))
 
             Text(
                 text = "Budget: ₹${budget.amount}",
                 fontSize = 12.sp,
-                color = SecondaryText
+                color = BudgetSecondaryText
             )
         }
     }
@@ -515,9 +551,9 @@ private fun EmptyBudgetCard(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(24.dp),
         colors = CardDefaults.cardColors(
-            containerColor = CardBackground
+            containerColor = BudgetCardBackground
         ),
-        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+        border = BorderStroke(1.dp, BudgetBorder)
     ) {
         Column(
             modifier = Modifier
@@ -528,36 +564,36 @@ private fun EmptyBudgetCard(
             Box(
                 modifier = Modifier
                     .size(64.dp)
-                    .clip(CircleShape)
-                    .background(PrimaryBlue),
+                    .clip(RoundedCornerShape(20.dp))
+                    .background(Color(0xFF1E3A5F)),
                 contentAlignment = Alignment.Center
             ) {
                 Icon(
                     imageVector = Icons.Default.Warning,
                     contentDescription = null,
-                    tint = Color.White,
+                    tint = BudgetBlueLight,
                     modifier = Modifier.size(32.dp)
                 )
             }
 
-            Spacer(modifier = Modifier.height(16.dp))
+            Spacer(Modifier.height(16.dp))
 
             Text(
                 text = "No budgets yet",
                 fontSize = 20.sp,
                 fontWeight = FontWeight.Bold,
-                color = MainText
+                color = BudgetMainText
             )
 
-            Spacer(modifier = Modifier.height(6.dp))
+            Spacer(Modifier.height(8.dp))
 
             Text(
                 text = "Set spending limits for your categories and keep your expenses under control.",
                 fontSize = 14.sp,
-                color = SecondaryText
+                color = BudgetSecondaryText
             )
 
-            Spacer(modifier = Modifier.height(18.dp))
+            Spacer(Modifier.height(20.dp))
 
             Button(
                 onClick = onAddBudget,
@@ -571,10 +607,28 @@ private fun EmptyBudgetCard(
                     contentDescription = null
                 )
 
-                Spacer(modifier = Modifier.size(6.dp))
+                Spacer(Modifier.size(8.dp))
 
                 Text("Create Budget")
             }
         }
+    }
+}
+
+@Composable
+private fun LoadingBudgetCard() {
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(20.dp),
+        colors = CardDefaults.cardColors(
+            containerColor = BudgetCardBackground
+        ),
+        border = BorderStroke(1.dp, BudgetBorder)
+    ) {
+        Text(
+            text = "Loading your budgets…",
+            modifier = Modifier.padding(24.dp),
+            color = BudgetSecondaryText
+        )
     }
 }
