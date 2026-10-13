@@ -1,6 +1,6 @@
-
 package com.example.expensetracker.ui.screens
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
@@ -58,14 +58,16 @@ import com.example.expensetracker.data.expenseCategories
 import com.example.expensetracker.data.local.ExpenseEntity
 import com.example.expensetracker.viewmodel.ExpenseViewModel
 
-private val HistoryBackground = Color(0xFF0B1120)
-private val HistoryCard = Color(0xFF151F32)
-private val HistoryBorder = Color(0xFF29364B)
-private val HistoryText = Color(0xFFF8FAFC)
-private val HistoryMuted = Color(0xFF94A3B8)
-private val HistoryBlue = Color(0xFF60A5FA)
-private val HistoryIncome = Color(0xFF4ADE80)
-private val HistoryExpense = Color(0xFFF87171)
+// Baby blue + white theme
+private val HistoryBackground = Color(0xFFF3F8FC)
+private val HistoryCard = Color(0xFFFFFFFF)
+private val HistoryBorder = Color(0xFFE0EAF3)
+private val HistoryText = Color(0xFF243B53)
+private val HistoryMuted = Color(0xFF71849A)
+private val HistoryBlue = Color(0xFF5AA9E6)
+private val HistoryBlueLight = Color(0xFFE4F2FF)
+private val HistoryIncome = Color(0xFF219A75)
+private val HistoryExpense = Color(0xFFE16D75)
 
 @Composable
 fun TransactionHistoryScreen(
@@ -138,6 +140,11 @@ fun TransactionHistoryScreen(
                     .size(46.dp)
                     .clip(RoundedCornerShape(14.dp))
                     .background(HistoryCard)
+                    .border(
+                        1.dp,
+                        HistoryBorder,
+                        RoundedCornerShape(14.dp)
+                    )
             ) {
                 Icon(
                     imageVector = Icons.Default.ArrowBack,
@@ -185,12 +192,14 @@ fun TransactionHistoryScreen(
                 Icon(
                     imageVector = Icons.Default.Search,
                     contentDescription = "Search",
-                    tint = HistoryMuted
+                    tint = HistoryBlue
                 )
             },
             trailingIcon = {
                 if (searchQuery.isNotEmpty()) {
-                    TextButton(onClick = { searchQuery = "" }) {
+                    TextButton(
+                        onClick = { searchQuery = "" }
+                    ) {
                         Text("Clear", color = HistoryBlue)
                     }
                 }
@@ -223,7 +232,8 @@ fun TransactionHistoryScreen(
                     colors = ButtonDefaults.buttonColors(
                         containerColor = HistoryCard,
                         contentColor = HistoryText
-                    )
+                    ),
+                    border = BorderStroke(1.dp, HistoryBorder)
                 ) {
                     Icon(
                         imageVector = Icons.Default.FilterList,
@@ -246,10 +256,13 @@ fun TransactionHistoryScreen(
 
                 DropdownMenu(
                     expanded = categoryExpanded,
-                    onDismissRequest = { categoryExpanded = false }
+                    onDismissRequest = { categoryExpanded = false },
+                    containerColor = HistoryCard
                 ) {
                     DropdownMenuItem(
-                        text = { Text("All Categories") },
+                        text = {
+                            Text("All Categories", color = HistoryText)
+                        },
                         onClick = {
                             selectedCategory = "All Categories"
                             categoryExpanded = false
@@ -258,7 +271,9 @@ fun TransactionHistoryScreen(
 
                     expenseCategories.forEach { category ->
                         DropdownMenuItem(
-                            text = { Text(category) },
+                            text = {
+                                Text(category, color = HistoryText)
+                            },
                             onClick = {
                                 selectedCategory = category
                                 categoryExpanded = false
@@ -276,7 +291,8 @@ fun TransactionHistoryScreen(
                     colors = ButtonDefaults.buttonColors(
                         containerColor = HistoryCard,
                         contentColor = HistoryText
-                    )
+                    ),
+                    border = BorderStroke(1.dp, HistoryBorder)
                 ) {
                     Text(
                         text = when (selectedType) {
@@ -290,10 +306,13 @@ fun TransactionHistoryScreen(
 
                 DropdownMenu(
                     expanded = typeExpanded,
-                    onDismissRequest = { typeExpanded = false }
+                    onDismissRequest = { typeExpanded = false },
+                    containerColor = HistoryCard
                 ) {
                     DropdownMenuItem(
-                        text = { Text("All types") },
+                        text = {
+                            Text("All types", color = HistoryText)
+                        },
                         onClick = {
                             selectedType = "ALL"
                             typeExpanded = false
@@ -301,7 +320,9 @@ fun TransactionHistoryScreen(
                     )
 
                     DropdownMenuItem(
-                        text = { Text("Income") },
+                        text = {
+                            Text("Income", color = HistoryText)
+                        },
                         onClick = {
                             selectedType = "INCOME"
                             typeExpanded = false
@@ -309,7 +330,9 @@ fun TransactionHistoryScreen(
                     )
 
                     DropdownMenuItem(
-                        text = { Text("Expense") },
+                        text = {
+                            Text("Expense", color = HistoryText)
+                        },
                         onClick = {
                             selectedType = "EXPENSE"
                             typeExpanded = false
@@ -337,14 +360,14 @@ fun TransactionHistoryScreen(
             Box(
                 modifier = Modifier
                     .clip(CircleShape)
-                    .background(HistoryCard)
+                    .background(HistoryBlueLight)
                     .padding(horizontal = 12.dp, vertical = 6.dp)
             ) {
                 Text(
                     text = "${filteredTransactions.size} found",
                     style = MaterialTheme.typography.labelMedium,
                     fontWeight = FontWeight.SemiBold,
-                    color = HistoryBlue
+                    color = Color(0xFF356F9F)
                 )
             }
         }
@@ -420,7 +443,9 @@ fun TransactionHistoryScreen(
                 }
             },
             dismissButton = {
-                TextButton(onClick = { transactionToDelete = null }) {
+                TextButton(
+                    onClick = { transactionToDelete = null }
+                ) {
                     Text("Cancel", color = HistoryMuted)
                 }
             }
@@ -436,7 +461,11 @@ private fun TransactionHistoryItem(
 ) {
     val isIncome = transaction.type == "INCOME"
     val accentColor = if (isIncome) HistoryIncome else HistoryExpense
-    val iconBackground = accentColor.copy(alpha = 0.12f)
+    val iconBackground = if (isIncome) {
+        Color(0xFFE2F6EE)
+    } else {
+        Color(0xFFFFE9EB)
+    }
 
     Card(
         modifier = Modifier
@@ -451,7 +480,7 @@ private fun TransactionHistoryItem(
             containerColor = HistoryCard
         ),
         elevation = CardDefaults.cardElevation(
-            defaultElevation = 0.dp
+            defaultElevation = 1.dp
         )
     ) {
         Column(
@@ -586,7 +615,7 @@ private fun EmptyTransactionState(
             modifier = Modifier
                 .size(76.dp)
                 .clip(RoundedCornerShape(24.dp))
-                .background(HistoryCard)
+                .background(HistoryBlueLight)
                 .border(
                     width = 1.dp,
                     color = HistoryBorder,

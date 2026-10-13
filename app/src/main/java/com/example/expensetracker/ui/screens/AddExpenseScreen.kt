@@ -1,6 +1,6 @@
-
 package com.example.expensetracker.ui.screens
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -35,9 +35,8 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
-import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -46,21 +45,25 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.example.expensetracker.data.expenseCategories
 import com.example.expensetracker.data.local.ExpenseEntity
 import com.example.expensetracker.viewmodel.ExpenseViewModel
 
-private val AddBackground = Color(0xFF0B1120)
-private val AddCard = Color(0xFF151F32)
-private val AddBorder = Color(0xFF29364B)
-private val AddText = Color(0xFFF8FAFC)
-private val AddMuted = Color(0xFF94A3B8)
-private val AddBlue = Color(0xFF2563EB)
-private val AddIncome = Color(0xFF4ADE80)
-private val AddExpense = Color(0xFFF87171)
+// Baby blue + white theme
+private val AddBackground = Color(0xFFF3F8FC)
+private val AddCard = Color(0xFFFFFFFF)
+private val AddBorder = Color(0xFFE0EAF3)
+private val AddText = Color(0xFF243B53)
+private val AddMuted = Color(0xFF71849A)
+private val AddBlue = Color(0xFF5AA9E6)
+private val AddBlueLight = Color(0xFFE4F2FF)
+private val AddIncome = Color(0xFF219A75)
+private val AddExpense = Color(0xFFE16D75)
 
 @Composable
 fun AddExpenseScreen(
@@ -88,8 +91,9 @@ fun AddExpenseScreen(
         Text(
             text = "NEW TRANSACTION",
             style = MaterialTheme.typography.labelMedium,
-            color = Color(0xFF93C5FD),
-            fontWeight = FontWeight.Bold
+            color = AddBlue,
+            fontWeight = FontWeight.Bold,
+            letterSpacing = 1.5.sp
         )
 
         Text(
@@ -112,9 +116,9 @@ fun AddExpenseScreen(
             colors = CardDefaults.cardColors(
                 containerColor = AddCard
             ),
-            border = androidx.compose.foundation.BorderStroke(
-                1.dp,
-                AddBorder
+            border = BorderStroke(1.dp, AddBorder),
+            elevation = CardDefaults.cardElevation(
+                defaultElevation = 1.dp
             )
         ) {
             Column(
@@ -124,7 +128,8 @@ fun AddExpenseScreen(
                     text = "TRANSACTION TYPE",
                     style = MaterialTheme.typography.labelMedium,
                     color = AddMuted,
-                    fontWeight = FontWeight.Bold
+                    fontWeight = FontWeight.Bold,
+                    letterSpacing = 1.sp
                 )
 
                 Spacer(Modifier.height(12.dp))
@@ -154,24 +159,31 @@ fun AddExpenseScreen(
             }
         }
 
-        // Amount input
-        Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+        // Amount
+        Column(
+            verticalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
             FieldLabel("Amount")
 
             OutlinedTextField(
                 value = amount,
                 onValueChange = { newValue ->
-                    if (newValue.isEmpty() || newValue.all { it.isDigit() }) {
+                    if (
+                        newValue.isEmpty() ||
+                        newValue.all { it.isDigit() }
+                    ) {
                         amount = newValue
                     }
                 },
                 modifier = Modifier.fillMaxWidth(),
-                placeholder = { Text("0", color = AddMuted) },
+                placeholder = {
+                    Text("0", color = AddMuted)
+                },
                 leadingIcon = {
                     Icon(
                         imageVector = Icons.Default.Payments,
                         contentDescription = null,
-                        tint = AddMuted
+                        tint = AddBlue
                     )
                 },
                 prefix = {
@@ -190,8 +202,10 @@ fun AddExpenseScreen(
             )
         }
 
-        // Title input
-        Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+        // Title
+        Column(
+            verticalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
             FieldLabel("Title")
 
             OutlinedTextField(
@@ -199,13 +213,16 @@ fun AddExpenseScreen(
                 onValueChange = { title = it },
                 modifier = Modifier.fillMaxWidth(),
                 placeholder = {
-                    Text("e.g. Grocery shopping", color = AddMuted)
+                    Text(
+                        "e.g. Grocery shopping",
+                        color = AddMuted
+                    )
                 },
                 leadingIcon = {
                     Icon(
                         imageVector = Icons.Default.ReceiptLong,
                         contentDescription = null,
-                        tint = AddMuted
+                        tint = AddBlue
                     )
                 },
                 singleLine = true,
@@ -214,8 +231,10 @@ fun AddExpenseScreen(
             )
         }
 
-        // Category selector
-        Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+        // Category
+        Column(
+            verticalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
             FieldLabel("Category")
 
             Box {
@@ -223,30 +242,36 @@ fun AddExpenseScreen(
                     modifier = Modifier.fillMaxWidth(),
                     shape = RoundedCornerShape(16.dp),
                     color = AddCard,
-                    border = androidx.compose.foundation.BorderStroke(
-                        1.dp,
-                        AddBorder
-                    ),
+                    border = BorderStroke(1.dp, AddBorder),
                     onClick = { categoryExpanded = true }
                 ) {
                     Row(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .padding(horizontal = 16.dp, vertical = 17.dp),
+                            .padding(
+                                horizontal = 16.dp,
+                                vertical = 17.dp
+                            ),
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         Icon(
                             imageVector = Icons.Default.Category,
                             contentDescription = null,
-                            tint = AddMuted
+                            tint = AddBlue
                         )
 
                         Spacer(Modifier.width(12.dp))
 
                         Text(
-                            text = category.ifEmpty { "Select a category" },
+                            text = category.ifEmpty {
+                                "Select a category"
+                            },
                             modifier = Modifier.weight(1f),
-                            color = if (category.isEmpty()) AddMuted else AddText,
+                            color = if (category.isEmpty()) {
+                                AddMuted
+                            } else {
+                                AddText
+                            },
                             style = MaterialTheme.typography.bodyLarge
                         )
 
@@ -260,7 +285,9 @@ fun AddExpenseScreen(
 
                 DropdownMenu(
                     expanded = categoryExpanded,
-                    onDismissRequest = { categoryExpanded = false },
+                    onDismissRequest = {
+                        categoryExpanded = false
+                    },
                     containerColor = AddCard
                 ) {
                     expenseCategories.forEach { item ->
@@ -282,13 +309,10 @@ fun AddExpenseScreen(
         }
 
         // Optional note
-        Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(8.dp)
-            ) {
-                FieldLabel("Note (optional)")
-            }
+        Column(
+            verticalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            FieldLabel("Note (optional)")
 
             OutlinedTextField(
                 value = note,
@@ -297,13 +321,16 @@ fun AddExpenseScreen(
                     .fillMaxWidth()
                     .height(120.dp),
                 placeholder = {
-                    Text("Add extra details...", color = AddMuted)
+                    Text(
+                        "Add extra details...",
+                        color = AddMuted
+                    )
                 },
                 leadingIcon = {
                     Icon(
                         imageVector = Icons.Default.Notes,
                         contentDescription = null,
-                        tint = AddMuted
+                        tint = AddBlue
                     )
                 },
                 shape = RoundedCornerShape(16.dp),
@@ -328,7 +355,11 @@ fun AddExpenseScreen(
                         title = title.trim(),
                         amount = amountValue,
                         category = category,
-                        type = if (isIncome) "INCOME" else "EXPENSE",
+                        type = if (isIncome) {
+                            "INCOME"
+                        } else {
+                            "EXPENSE"
+                        },
                         date = System.currentTimeMillis(),
                         note = note.trim()
                     )
@@ -378,29 +409,41 @@ private fun FieldLabel(text: String) {
 private fun TypeOption(
     title: String,
     selected: Boolean,
-    icon: androidx.compose.ui.graphics.vector.ImageVector,
+    icon: ImageVector,
     selectedColor: Color,
     modifier: Modifier = Modifier,
     onClick: () -> Unit
 ) {
     val background = if (selected) {
-        selectedColor.copy(alpha = 0.12f)
+        selectedColor.copy(alpha = 0.10f)
     } else {
         AddBackground
     }
 
-    val border = if (selected) selectedColor else AddBorder
-    val contentColor = if (selected) selectedColor else AddMuted
+    val borderColor = if (selected) {
+        selectedColor.copy(alpha = 0.75f)
+    } else {
+        AddBorder
+    }
+
+    val contentColor = if (selected) {
+        selectedColor
+    } else {
+        AddMuted
+    }
 
     Surface(
         modifier = modifier,
         onClick = onClick,
         shape = RoundedCornerShape(14.dp),
         color = background,
-        border = androidx.compose.foundation.BorderStroke(1.dp, border)
+        border = BorderStroke(1.dp, borderColor)
     ) {
         Row(
-            modifier = Modifier.padding(vertical = 14.dp, horizontal = 10.dp),
+            modifier = Modifier.padding(
+                vertical = 14.dp,
+                horizontal = 10.dp
+            ),
             horizontalArrangement = Arrangement.Center,
             verticalAlignment = Alignment.CenterVertically
         ) {
@@ -425,13 +468,13 @@ private fun TypeOption(
 private fun addFieldColors() = OutlinedTextFieldDefaults.colors(
     focusedTextColor = AddText,
     unfocusedTextColor = AddText,
-    cursorColor = Color(0xFF93C5FD),
-    focusedBorderColor = Color(0xFF60A5FA),
+    cursorColor = AddBlue,
+    focusedBorderColor = AddBlue,
     unfocusedBorderColor = AddBorder,
-    focusedLabelColor = Color(0xFF93C5FD),
+    focusedLabelColor = AddBlue,
     unfocusedLabelColor = AddMuted,
     focusedContainerColor = AddCard,
     unfocusedContainerColor = AddCard,
-    focusedLeadingIconColor = AddMuted,
+    focusedLeadingIconColor = AddBlue,
     unfocusedLeadingIconColor = AddMuted
 )

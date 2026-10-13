@@ -19,6 +19,8 @@ import androidx.compose.material.icons.filled.Analytics
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.ReceiptLong
 import androidx.compose.material.icons.filled.Wallet
+import androidx.compose.material3.Button
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Scaffold
@@ -33,7 +35,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.navigation.NavDestination.Companion.hierarchy
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
@@ -52,11 +53,15 @@ import com.example.expensetracker.ui.screens.TransactionHistoryScreen
 import com.example.expensetracker.viewmodel.BudgetViewModel
 import com.example.expensetracker.viewmodel.ExpenseViewModel
 
-private val AppBackground = Color(0xFF0B1120)
-private val BottomBarBackground = Color(0xFF101827)
-private val AccentPurple = Color(0xFF8B5CF6)
-private val MutedIcon = Color(0xFF94A3B8)
-private val SelectedBackground = Color(0xFF292044)
+// Baby blue + white theme
+private val AppBackground = Color(0xFFF3F8FC)
+private val BottomBarBackground = Color(0xFFFFFFFF)
+private val AccentBlue = Color(0xFF5AA9E6)
+private val DeepBlue = Color(0xFF356F9F)
+private val MutedIcon = Color(0xFF8A9BAD)
+private val SelectedBackground = Color(0xFFDCEEFF)
+private val PrimaryText = Color(0xFF243B53)
+private val SecondaryText = Color(0xFF71849A)
 
 private data class BottomDestination(
     val route: String,
@@ -120,6 +125,7 @@ fun AppNavigation(
                 .background(AppBackground)
                 .padding(paddingValues)
         ) {
+
             composable("dashboard") {
                 DashboardScreen(
                     viewModel = viewModel,
@@ -141,7 +147,9 @@ fun AppNavigation(
             composable("analytics") {
                 AnalyticsScreen(
                     viewModel = viewModel,
-                    onBack = { navController.popBackStack() }
+                    onBack = {
+                        navController.popBackStack()
+                    }
                 )
             }
 
@@ -149,12 +157,14 @@ fun AppNavigation(
                 BudgetScreen(
                     budgetViewModel = budgetViewModel,
                     expenseViewModel = viewModel,
-                    onBack = { navController.popBackStack() },
+                    onBack = {
+                        navController.popBackStack()
+                    },
                     onAddBudget = {
                         navController.navigate("add_budget")
                     },
-                    onEditBudget = { budgetId ->
-                        navController.navigate("edit_budget/$budgetId")
+                    onEditBudget = { budget ->
+                        navController.navigate("edit_budget/${budget.id}")
                     }
                 )
             }
@@ -167,26 +177,74 @@ fun AppNavigation(
                     }
                 )
             ) { entry ->
+
                 val budgetId = entry.arguments?.getLong("budgetId")
 
                 val budgets by budgetViewModel.budgets
                     .collectAsStateWithLifecycle()
 
-                val budget = budgets.orEmpty().find {
-                    it.id == budgetId
-                }
+                val budget = budgets?.find { it.id == budgetId }
 
-                if (budget != null) {
-                    EditBudgetScreen(
-                        budget = budget,
-                        budgetViewModel = budgetViewModel,
-                        onBudgetUpdated = {
-                            navController.popBackStack()
-                        },
-                        onBack = {
-                            navController.popBackStack()
+                when {
+                    budget != null -> {
+                        EditBudgetScreen(
+                            budget = budget,
+                            budgetViewModel = budgetViewModel,
+                            onBudgetUpdated = {
+                                navController.popBackStack()
+                            },
+                            onBack = {
+                                navController.popBackStack()
+                            }
+                        )
+                    }
+
+                    budgets == null -> {
+                        Box(
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .background(AppBackground),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            CircularProgressIndicator(
+                                color = AccentBlue
+                            )
                         }
-                    )
+                    }
+
+                    else -> {
+                        Column(
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .background(AppBackground)
+                                .padding(24.dp),
+                            horizontalAlignment = Alignment.CenterHorizontally,
+                            verticalArrangement = Arrangement.Center
+                        ) {
+                            Text(
+                                text = "Budget not found",
+                                color = PrimaryText,
+                                fontWeight = FontWeight.Bold
+                            )
+
+                            Spacer(Modifier.height(12.dp))
+
+                            Text(
+                                text = "This budget may have been deleted.",
+                                color = SecondaryText
+                            )
+
+                            Spacer(Modifier.height(16.dp))
+
+                            Button(
+                                onClick = {
+                                    navController.popBackStack()
+                                }
+                            ) {
+                                Text("Go back")
+                            }
+                        }
+                    }
                 }
             }
 
@@ -233,6 +291,7 @@ fun AppNavigation(
                     }
                 )
             ) { entry ->
+
                 val transactionId =
                     entry.arguments?.getLong("transactionId")
 
@@ -254,6 +313,17 @@ fun AppNavigation(
                             navController.popBackStack()
                         }
                     )
+                } else {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .background(AppBackground),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        CircularProgressIndicator(
+                            color = AccentBlue
+                        )
+                    }
                 }
             }
         }
@@ -274,20 +344,26 @@ private fun CustomBottomBar(
         horizontalArrangement = Arrangement.SpaceEvenly,
         verticalAlignment = Alignment.CenterVertically
     ) {
+
         BottomNavigationItem(
             destination = bottomDestinations[0],
             selected = selectedRoute == bottomDestinations[0].route,
-            onClick = { onNavigate(bottomDestinations[0].route) },
+            onClick = {
+                onNavigate(bottomDestinations[0].route)
+            },
             modifier = Modifier.weight(1f)
         )
 
         BottomNavigationItem(
             destination = bottomDestinations[1],
             selected = selectedRoute == bottomDestinations[1].route,
-            onClick = { onNavigate(bottomDestinations[1].route) },
+            onClick = {
+                onNavigate(bottomDestinations[1].route)
+            },
             modifier = Modifier.weight(1f)
         )
 
+        // Central Add button
         Column(
             modifier = Modifier.weight(1f),
             horizontalAlignment = Alignment.CenterHorizontally,
@@ -297,7 +373,7 @@ private fun CustomBottomBar(
                 onClick = onAddClick,
                 modifier = Modifier.size(52.dp),
                 shape = CircleShape,
-                containerColor = AccentPurple,
+                containerColor = AccentBlue,
                 contentColor = Color.White
             ) {
                 Icon(
@@ -311,22 +387,27 @@ private fun CustomBottomBar(
 
             Text(
                 text = "Add",
-                color = MutedIcon,
-                fontSize = 11.sp
+                color = SecondaryText,
+                fontSize = 11.sp,
+                fontWeight = FontWeight.Medium
             )
         }
 
         BottomNavigationItem(
             destination = bottomDestinations[2],
             selected = selectedRoute == bottomDestinations[2].route,
-            onClick = { onNavigate(bottomDestinations[2].route) },
+            onClick = {
+                onNavigate(bottomDestinations[2].route)
+            },
             modifier = Modifier.weight(1f)
         )
 
         BottomNavigationItem(
             destination = bottomDestinations[3],
             selected = selectedRoute == bottomDestinations[3].route,
-            onClick = { onNavigate(bottomDestinations[3].route) },
+            onClick = {
+                onNavigate(bottomDestinations[3].route)
+            },
             modifier = Modifier.weight(1f)
         )
     }
@@ -339,7 +420,7 @@ private fun BottomNavigationItem(
     onClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    val itemColor = if (selected) AccentPurple else MutedIcon
+    val itemColor = if (selected) DeepBlue else MutedIcon
 
     Column(
         modifier = modifier

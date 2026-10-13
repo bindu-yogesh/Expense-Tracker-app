@@ -20,26 +20,25 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.AccountBalanceWallet
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.ArrowDownward
 import androidx.compose.material.icons.filled.ArrowUpward
 import androidx.compose.material.icons.filled.BarChart
-import androidx.compose.material.icons.filled.Receipt
-import androidx.compose.material.icons.filled.Restaurant
-import androidx.compose.material.icons.filled.ShoppingBag
-import androidx.compose.material.icons.filled.DirectionsBus
-import androidx.compose.material.icons.filled.Payments
 import androidx.compose.material.icons.filled.Category
-import androidx.compose.material.icons.filled.AccountBalanceWallet
-import androidx.compose.material.icons.filled.School
+import androidx.compose.material.icons.filled.DirectionsBus
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.MoreHoriz
+import androidx.compose.material.icons.filled.Payments
+import androidx.compose.material.icons.filled.Receipt
+import androidx.compose.material.icons.filled.Restaurant
+import androidx.compose.material.icons.filled.School
+import androidx.compose.material.icons.filled.ShoppingBag
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -61,13 +60,17 @@ import com.example.expensetracker.ui.theme.ExpenseRed
 import com.example.expensetracker.ui.theme.IncomeGreen
 import com.example.expensetracker.viewmodel.ExpenseViewModel
 
-private val DashboardBackground = Color(0xFF080D1B)
-private val DashboardCard = Color(0xFF101A30)
-private val DashboardBorder = Color(0xFF203254)
-private val DashboardText = Color(0xFFF8FAFC)
-private val DashboardMuted = Color(0xFF9BAAC7)
-private val DashboardPurple = Color(0xFF8B5CF6)
-private val DashboardBlue = Color(0xFF3B82F6)
+// Premium light baby-blue theme
+private val DashboardBackground = Color(0xFFF3F8FC)
+private val DashboardCard = Color(0xFFFFFFFF)
+private val DashboardBorder = Color(0xFFE0EAF3)
+private val DashboardText = Color(0xFF243B53)
+private val DashboardMuted = Color(0xFF71849A)
+private val DashboardBlue = Color(0xFF5AA9E6)
+private val DashboardLightBlue = Color(0xFFE4F2FF)
+private val DashboardDeepBlue = Color(0xFF356F9F)
+private val DashboardGreen = Color(0xFF16866A)
+private val DashboardRed = Color(0xFFD95768)
 
 @Composable
 fun DashboardScreen(
@@ -88,9 +91,9 @@ fun DashboardScreen(
             .background(DashboardBackground)
             .statusBarsPadding()
             .verticalScroll(rememberScrollState())
-            .padding(horizontal = 18.dp)
+            .padding(horizontal = 20.dp)
     ) {
-        Spacer(Modifier.height(18.dp))
+        Spacer(Modifier.height(20.dp))
 
         // Header
         Row(
@@ -100,23 +103,26 @@ fun DashboardScreen(
             Column(modifier = Modifier.weight(1f)) {
                 Text(
                     text = "YOUR FINANCES",
-                    color = DashboardMuted,
-                    fontSize = 11.sp,
+                    color = DashboardDeepBlue,
+                    fontSize = 10.sp,
                     fontWeight = FontWeight.Bold,
-                    letterSpacing = 1.5.sp
+                    letterSpacing = 2.sp
                 )
 
-                Spacer(Modifier.height(5.dp))
+                Spacer(Modifier.height(6.dp))
 
                 Text(
                     text = "Expense Tracker",
                     color = DashboardText,
-                    fontSize = 25.sp,
-                    fontWeight = FontWeight.ExtraBold
+                    fontSize = 26.sp,
+                    fontWeight = FontWeight.ExtraBold,
+                    letterSpacing = (-0.6).sp
                 )
 
+                Spacer(Modifier.height(4.dp))
+
                 Text(
-                    text = "Track  ·  Manage  ·  Save",
+                    text = "A clearer view of your money.",
                     color = DashboardMuted,
                     fontSize = 12.sp
                 )
@@ -124,43 +130,45 @@ fun DashboardScreen(
 
             Box(
                 modifier = Modifier
-                    .size(44.dp)
-                    .clip(CircleShape)
+                    .size(49.dp)
+                    .clip(RoundedCornerShape(16.dp))
                     .background(
                         Brush.linearGradient(
                             listOf(
-                                DashboardPurple,
-                                Color(0xFF5534C7)
+                                Color(0xFFB9DDFB),
+                                Color(0xFF82BDEB)
                             )
                         )
                     ),
                 contentAlignment = Alignment.Center
             ) {
-                Text(
-                    text = "₹",
-                    color = Color.White,
-                    fontSize = 23.sp,
-                    fontWeight = FontWeight.Bold
+                Icon(
+                    imageVector = Icons.Default.AccountBalanceWallet,
+                    contentDescription = "Expense Tracker",
+                    tint = Color(0xFF214F75),
+                    modifier = Modifier.size(25.dp)
                 )
             }
         }
 
-        Spacer(Modifier.height(22.dp))
+        Spacer(Modifier.height(25.dp))
 
-        // Balance card
+        // Main balance card
         Card(
             modifier = Modifier
                 .fillMaxWidth()
                 .border(
-                    1.dp,
-                    Color(0xFF7557F5).copy(alpha = 0.65f),
-                    RoundedCornerShape(23.dp)
+                    width = 1.dp,
+                    color = Color(0xFFBBDCF5),
+                    shape = RoundedCornerShape(25.dp)
                 ),
-            shape = RoundedCornerShape(23.dp),
+            shape = RoundedCornerShape(25.dp),
             colors = CardDefaults.cardColors(
-                containerColor = DashboardPurple
+                containerColor = Color.Transparent
             ),
-            elevation = CardDefaults.cardElevation(0.dp)
+            elevation = CardDefaults.cardElevation(
+                defaultElevation = 0.dp
+            )
         ) {
             Box(
                 modifier = Modifier
@@ -168,65 +176,191 @@ fun DashboardScreen(
                     .background(
                         Brush.linearGradient(
                             colors = listOf(
-                                Color(0xFF713DF0),
-                                Color(0xFF4330A9),
-                                Color(0xFF29245F)
+                                Color(0xFFE0F1FF),
+                                Color(0xFFC7E5FC),
+                                Color(0xFFB7DDF8)
                             )
                         )
                     )
-                    .padding(21.dp)
+                    .padding(22.dp)
             ) {
                 Column {
-                    Text(
-                        text = "Total Balance",
-                        color = Color.White.copy(alpha = 0.85f),
-                        fontSize = 14.sp
-                    )
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Text(
+                            text = "TOTAL BALANCE",
+                            color = Color(0xFF416987),
+                            fontSize = 11.sp,
+                            fontWeight = FontWeight.Bold,
+                            letterSpacing = 1.4.sp
+                        )
 
-                    Spacer(Modifier.height(7.dp))
+                        Spacer(Modifier.weight(1f))
+
+                        Box(
+                            modifier = Modifier
+                                .clip(RoundedCornerShape(12.dp))
+                                .background(Color.White.copy(alpha = 0.75f))
+                                .padding(9.dp)
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.AccountBalanceWallet,
+                                contentDescription = null,
+                                tint = DashboardDeepBlue,
+                                modifier = Modifier.size(20.dp)
+                            )
+                        }
+                    }
+
+                    Spacer(Modifier.height(14.dp))
 
                     Text(
                         text = formatRupees(balance),
-                        color = Color.White,
+                        color = Color(0xFF203E59),
                         fontSize = 32.sp,
                         fontWeight = FontWeight.ExtraBold,
+                        letterSpacing = (-0.8).sp,
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis
                     )
 
                     Spacer(Modifier.height(10.dp))
 
-                    Row(verticalAlignment = Alignment.CenterVertically) {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
                         Box(
                             modifier = Modifier
                                 .size(7.dp)
-                                .clip(CircleShape)
-                                .background(Color(0xFFA7F3D0))
+                                .background(
+                                    Color(0xFF16866A),
+                                    CircleShape
+                                )
                         )
 
-                        Spacer(Modifier.width(7.dp))
+                        Spacer(Modifier.width(8.dp))
 
                         Text(
-                            text = "Your available balance",
-                            color = Color.White.copy(alpha = 0.85f),
+                            text = "Your current available balance",
+                            color = Color(0xFF416987),
                             fontSize = 12.sp
                         )
+                    }
+
+                    Spacer(Modifier.height(21.dp))
+
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(1.dp)
+                            .background(
+                                Color(0xFF6E9DBD).copy(alpha = 0.25f)
+                            )
+                    )
+
+                    Spacer(Modifier.height(16.dp))
+
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Column(modifier = Modifier.weight(1f)) {
+                            Row(verticalAlignment = Alignment.CenterVertically) {
+                                Icon(
+                                    imageVector = Icons.Default.ArrowUpward,
+                                    contentDescription = null,
+                                    tint = DashboardGreen,
+                                    modifier = Modifier.size(15.dp)
+                                )
+
+                                Spacer(Modifier.width(5.dp))
+
+                                Text(
+                                    text = "Income",
+                                    color = Color(0xFF416987),
+                                    fontSize = 12.sp
+                                )
+                            }
+
+                            Spacer(Modifier.height(7.dp))
+
+                            Text(
+                                text = formatRupees(income),
+                                color = Color(0xFF203E59),
+                                fontSize = 17.sp,
+                                fontWeight = FontWeight.Bold,
+                                maxLines = 1,
+                                overflow = TextOverflow.Ellipsis
+                            )
+                        }
+
+                        Box(
+                            modifier = Modifier
+                                .width(1.dp)
+                                .height(38.dp)
+                                .background(
+                                    Color(0xFF6E9DBD).copy(alpha = 0.3f)
+                                )
+                        )
+
+                        Spacer(Modifier.width(17.dp))
+
+                        Column(modifier = Modifier.weight(1f)) {
+                            Row(verticalAlignment = Alignment.CenterVertically) {
+                                Icon(
+                                    imageVector = Icons.Default.ArrowDownward,
+                                    contentDescription = null,
+                                    tint = DashboardRed,
+                                    modifier = Modifier.size(15.dp)
+                                )
+
+                                Spacer(Modifier.width(5.dp))
+
+                                Text(
+                                    text = "Expenses",
+                                    color = Color(0xFF416987),
+                                    fontSize = 12.sp
+                                )
+                            }
+
+                            Spacer(Modifier.height(7.dp))
+
+                            Text(
+                                text = formatRupees(expenses),
+                                color = Color(0xFF203E59),
+                                fontSize = 17.sp,
+                                fontWeight = FontWeight.Bold,
+                                maxLines = 1,
+                                overflow = TextOverflow.Ellipsis
+                            )
+                        }
                     }
                 }
             }
         }
 
-        Spacer(Modifier.height(20.dp))
+        Spacer(Modifier.height(27.dp))
 
+        // Overview
         Text(
-            text = "OVERVIEW",
-            color = DashboardMuted,
-            fontSize = 11.sp,
+            text = "Financial overview",
+            color = DashboardText,
+            fontSize = 19.sp,
             fontWeight = FontWeight.Bold,
-            letterSpacing = 1.5.sp
+            letterSpacing = (-0.3).sp
         )
 
-        Spacer(Modifier.height(11.dp))
+        Spacer(Modifier.height(4.dp))
+
+        Text(
+            text = "Your money at a glance",
+            color = DashboardMuted,
+            fontSize = 12.sp
+        )
+
+        Spacer(Modifier.height(15.dp))
 
         Row(
             modifier = Modifier.fillMaxWidth(),
@@ -236,7 +370,7 @@ fun DashboardScreen(
                 title = "Total Income",
                 amount = income,
                 icon = Icons.Default.ArrowUpward,
-                iconColor = IncomeGreen,
+                iconColor = DashboardGreen,
                 modifier = Modifier.weight(1f)
             )
 
@@ -244,21 +378,21 @@ fun DashboardScreen(
                 title = "Total Expenses",
                 amount = expenses,
                 icon = Icons.Default.ArrowDownward,
-                iconColor = ExpenseRed,
+                iconColor = DashboardRed,
                 modifier = Modifier.weight(1f)
             )
         }
 
-        Spacer(Modifier.height(26.dp))
+        Spacer(Modifier.height(28.dp))
 
-        // Recent transactions heading
+        // Recent transactions
         Row(
             modifier = Modifier.fillMaxWidth(),
             verticalAlignment = Alignment.CenterVertically
         ) {
             Column(modifier = Modifier.weight(1f)) {
                 Text(
-                    text = "Recent Transactions",
+                    text = "Recent transactions",
                     color = DashboardText,
                     fontSize = 19.sp,
                     fontWeight = FontWeight.Bold
@@ -276,13 +410,14 @@ fun DashboardScreen(
             TextButton(onClick = onViewAllTransactions) {
                 Text(
                     text = "See all",
-                    color = Color(0xFFB69BFF),
+                    color = DashboardDeepBlue,
+                    fontSize = 13.sp,
                     fontWeight = FontWeight.SemiBold
                 )
             }
         }
 
-        Spacer(Modifier.height(10.dp))
+        Spacer(Modifier.height(9.dp))
 
         if (transactions.isEmpty()) {
             EmptyTransactions(
@@ -293,17 +428,20 @@ fun DashboardScreen(
                 modifier = Modifier
                     .fillMaxWidth()
                     .border(
-                        1.dp,
-                        DashboardBorder,
-                        RoundedCornerShape(20.dp)
+                        width = 1.dp,
+                        color = DashboardBorder,
+                        shape = RoundedCornerShape(21.dp)
                     ),
-                shape = RoundedCornerShape(20.dp),
+                shape = RoundedCornerShape(21.dp),
                 colors = CardDefaults.cardColors(
                     containerColor = DashboardCard
+                ),
+                elevation = CardDefaults.cardElevation(
+                    defaultElevation = 0.dp
                 )
             ) {
                 Column(
-                    modifier = Modifier.padding(horizontal = 12.dp)
+                    modifier = Modifier.padding(horizontal = 14.dp)
                 ) {
                     transactions.take(5).forEachIndexed { index, transaction ->
                         TransactionItem(transaction)
@@ -321,7 +459,7 @@ fun DashboardScreen(
             }
         }
 
-        Spacer(Modifier.height(22.dp))
+        Spacer(Modifier.height(27.dp))
 
         // Primary action
         Button(
@@ -329,15 +467,20 @@ fun DashboardScreen(
             modifier = Modifier
                 .fillMaxWidth()
                 .height(55.dp),
-            shape = RoundedCornerShape(17.dp),
+            shape = RoundedCornerShape(16.dp),
             colors = ButtonDefaults.buttonColors(
-                containerColor = DashboardPurple,
-                contentColor = Color.White
+                containerColor = Color(0xFF5AA9E6),
+                contentColor = Color(0xFF153B59)
+            ),
+            elevation = ButtonDefaults.buttonElevation(
+                defaultElevation = 0.dp,
+                pressedElevation = 2.dp
             )
         ) {
             Icon(
                 imageVector = Icons.Default.Add,
-                contentDescription = null
+                contentDescription = null,
+                modifier = Modifier.size(21.dp)
             )
 
             Spacer(Modifier.width(8.dp))
@@ -359,21 +502,28 @@ fun DashboardScreen(
                 onClick = onViewBudgets,
                 modifier = Modifier
                     .weight(1f)
-                    .height(49.dp),
-                shape = RoundedCornerShape(15.dp)
+                    .height(50.dp),
+                shape = RoundedCornerShape(15.dp),
+                colors = ButtonDefaults.outlinedButtonColors(
+                    contentColor = DashboardDeepBlue
+                ),
+                border = androidx.compose.foundation.BorderStroke(
+                    1.dp,
+                    Color(0xFFCADDEB)
+                )
             ) {
                 Icon(
                     imageVector = Icons.Default.Receipt,
                     contentDescription = null,
-                    modifier = Modifier.size(18.dp),
-                    tint = Color(0xFFB69BFF)
+                    modifier = Modifier.size(18.dp)
                 )
 
-                Spacer(Modifier.width(6.dp))
+                Spacer(Modifier.width(7.dp))
 
                 Text(
                     text = "Budgets",
-                    color = DashboardText
+                    fontSize = 13.sp,
+                    fontWeight = FontWeight.SemiBold
                 )
             }
 
@@ -381,26 +531,33 @@ fun DashboardScreen(
                 onClick = onViewAnalytics,
                 modifier = Modifier
                     .weight(1f)
-                    .height(49.dp),
-                shape = RoundedCornerShape(15.dp)
+                    .height(50.dp),
+                shape = RoundedCornerShape(15.dp),
+                colors = ButtonDefaults.outlinedButtonColors(
+                    contentColor = DashboardDeepBlue
+                ),
+                border = androidx.compose.foundation.BorderStroke(
+                    1.dp,
+                    Color(0xFFCADDEB)
+                )
             ) {
                 Icon(
                     imageVector = Icons.Default.BarChart,
                     contentDescription = null,
-                    modifier = Modifier.size(18.dp),
-                    tint = Color(0xFFB69BFF)
+                    modifier = Modifier.size(18.dp)
                 )
 
-                Spacer(Modifier.width(6.dp))
+                Spacer(Modifier.width(7.dp))
 
                 Text(
                     text = "Analytics",
-                    color = DashboardText
+                    fontSize = 13.sp,
+                    fontWeight = FontWeight.SemiBold
                 )
             }
         }
 
-        Spacer(Modifier.height(26.dp))
+        Spacer(Modifier.height(28.dp))
     }
 }
 
@@ -414,31 +571,35 @@ private fun SummaryCard(
 ) {
     Card(
         modifier = modifier.border(
-            1.dp,
-            iconColor.copy(alpha = 0.22f),
-            RoundedCornerShape(19.dp)
+            width = 1.dp,
+            color = DashboardBorder,
+            shape = RoundedCornerShape(20.dp)
         ),
-        shape = RoundedCornerShape(19.dp),
+        shape = RoundedCornerShape(20.dp),
         colors = CardDefaults.cardColors(
-            containerColor = iconColor.copy(alpha = 0.09f)
+            containerColor = DashboardCard
+        ),
+        elevation = CardDefaults.cardElevation(
+            defaultElevation = 0.dp
         )
     ) {
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(13.dp)
+                .padding(15.dp)
         ) {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
+            Box(
+                modifier = Modifier
+                    .size(38.dp)
+                    .clip(RoundedCornerShape(12.dp))
+                    .background(
+                        if (iconColor == DashboardGreen)
+                            Color(0xFFE2F6EF)
+                        else
+                            Color(0xFFFFE9EC)
+                    ),
+                contentAlignment = Alignment.Center
             ) {
-                Text(
-                    text = title,
-                    color = DashboardMuted,
-                    fontSize = 12.sp
-                )
-
                 Icon(
                     imageVector = icon,
                     contentDescription = null,
@@ -447,12 +608,21 @@ private fun SummaryCard(
                 )
             }
 
-            Spacer(Modifier.height(10.dp))
+            Spacer(Modifier.height(13.dp))
+
+            Text(
+                text = title,
+                color = DashboardMuted,
+                fontSize = 11.sp,
+                fontWeight = FontWeight.Medium
+            )
+
+            Spacer(Modifier.height(7.dp))
 
             Text(
                 text = formatRupees(amount),
-                color = iconColor,
-                fontSize = 20.sp,
+                color = DashboardText,
+                fontSize = 19.sp,
                 fontWeight = FontWeight.Bold,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis
@@ -462,7 +632,9 @@ private fun SummaryCard(
 }
 
 @Composable
-private fun TransactionItem(transaction: ExpenseEntity) {
+private fun TransactionItem(
+    transaction: ExpenseEntity
+) {
     val isIncome = transaction.type == "INCOME"
     val amountColor = if (isIncome) IncomeGreen else ExpenseRed
     val categoryColor = categoryAccent(transaction.category)
@@ -470,14 +642,14 @@ private fun TransactionItem(transaction: ExpenseEntity) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(vertical = 13.dp),
+            .padding(vertical = 14.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
         Box(
             modifier = Modifier
-                .size(43.dp)
-                .clip(CircleShape)
-                .background(categoryColor.copy(alpha = 0.16f)),
+                .size(44.dp)
+                .clip(RoundedCornerShape(14.dp))
+                .background(categoryColor.copy(alpha = 0.12f)),
             contentAlignment = Alignment.Center
         ) {
             Icon(
@@ -500,7 +672,7 @@ private fun TransactionItem(transaction: ExpenseEntity) {
                 overflow = TextOverflow.Ellipsis
             )
 
-            Spacer(Modifier.height(4.dp))
+            Spacer(Modifier.height(5.dp))
 
             Text(
                 text = transaction.category,
@@ -511,14 +683,15 @@ private fun TransactionItem(transaction: ExpenseEntity) {
             )
         }
 
-        Spacer(Modifier.width(6.dp))
+        Spacer(Modifier.width(8.dp))
 
         Text(
             text = "${if (isIncome) "+" else "−"}${formatRupees(transaction.amount)}",
             color = amountColor,
             fontSize = 12.sp,
             fontWeight = FontWeight.Bold,
-            maxLines = 1
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis
         )
     }
 }
@@ -531,37 +704,40 @@ private fun EmptyTransactions(
         modifier = Modifier
             .fillMaxWidth()
             .border(
-                1.dp,
-                DashboardBorder,
-                RoundedCornerShape(20.dp)
+                width = 1.dp,
+                color = DashboardBorder,
+                shape = RoundedCornerShape(22.dp)
             ),
-        shape = RoundedCornerShape(20.dp),
+        shape = RoundedCornerShape(22.dp),
         colors = CardDefaults.cardColors(
             containerColor = DashboardCard
+        ),
+        elevation = CardDefaults.cardElevation(
+            defaultElevation = 0.dp
         )
     ) {
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(24.dp),
+                .padding(horizontal = 24.dp, vertical = 28.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Box(
                 modifier = Modifier
-                    .size(60.dp)
+                    .size(62.dp)
                     .clip(RoundedCornerShape(19.dp))
-                    .background(Color(0xFF28204B)),
+                    .background(DashboardLightBlue),
                 contentAlignment = Alignment.Center
             ) {
                 Icon(
                     imageVector = Icons.Default.AccountBalanceWallet,
                     contentDescription = null,
-                    tint = Color(0xFFB69BFF),
-                    modifier = Modifier.size(30.dp)
+                    tint = DashboardDeepBlue,
+                    modifier = Modifier.size(29.dp)
                 )
             }
 
-            Spacer(Modifier.height(14.dp))
+            Spacer(Modifier.height(15.dp))
 
             Text(
                 text = "No transactions yet",
@@ -570,24 +746,37 @@ private fun EmptyTransactions(
                 fontWeight = FontWeight.Bold
             )
 
-            Spacer(Modifier.height(6.dp))
+            Spacer(Modifier.height(7.dp))
 
             Text(
                 text = "Start tracking your money by adding your first transaction.",
                 color = DashboardMuted,
-                fontSize = 12.sp
+                fontSize = 12.sp,
+                lineHeight = 19.sp
             )
 
-            Spacer(Modifier.height(16.dp))
+            Spacer(Modifier.height(17.dp))
 
             Button(
                 onClick = onAddTransaction,
                 colors = ButtonDefaults.buttonColors(
-                    containerColor = DashboardPurple
+                    containerColor = DashboardBlue,
+                    contentColor = Color(0xFF153B59)
                 ),
                 shape = RoundedCornerShape(13.dp)
             ) {
-                Text("Add Transaction")
+                Icon(
+                    imageVector = Icons.Default.Add,
+                    contentDescription = null,
+                    modifier = Modifier.size(18.dp)
+                )
+
+                Spacer(Modifier.width(6.dp))
+
+                Text(
+                    text = "Add Transaction",
+                    fontWeight = FontWeight.SemiBold
+                )
             }
         }
     }
@@ -603,28 +792,62 @@ private fun formatRupees(amount: Long): String {
 
 private fun categoryAccent(category: String): Color {
     return when (category.lowercase()) {
-        "food", "food & dining", "food and dining" -> Color(0xFFFF914D)
-        "transport", "travel" -> Color(0xFF4D8DFF)
-        "shopping" -> Color(0xFFC084FC)
-        "bills", "utilities" -> Color(0xFF2DD4BF)
-        "health", "medical" -> Color(0xFF34D399)
-        "education" -> Color(0xFF8B5CF6)
-        "entertainment" -> Color(0xFFF472B6)
-        "salary", "income" -> IncomeGreen
-        else -> Color(0xFF93A4C7)
+        "food", "food & dining", "food and dining" ->
+            Color(0xFFE99A52)
+
+        "transport", "travel" ->
+            Color(0xFF4B93CC)
+
+        "shopping" ->
+            Color(0xFF9672D5)
+
+        "bills", "utilities" ->
+            Color(0xFF219E91)
+
+        "health", "medical" ->
+            Color(0xFF299C79)
+
+        "education" ->
+            Color(0xFF688ED1)
+
+        "salary", "income" ->
+            IncomeGreen
+
+        "entertainment" ->
+            Color(0xFFD76A9B)
+
+        else ->
+            Color(0xFF7E91A7)
     }
 }
 
 private fun categoryIcon(category: String): ImageVector {
     return when (category.lowercase()) {
-        "food", "food & dining", "food and dining" -> Icons.Default.Restaurant
-        "transport", "travel" -> Icons.Default.DirectionsBus
-        "shopping" -> Icons.Default.ShoppingBag
-        "bills", "utilities" -> Icons.Default.Payments
-        "health", "medical" -> Icons.Default.Favorite
-        "education" -> Icons.Default.School
-        "salary", "income" -> Icons.Default.ArrowUpward
-        "entertainment" -> Icons.Default.Category
-        else -> Icons.Default.MoreHoriz
+        "food", "food & dining", "food and dining" ->
+            Icons.Default.Restaurant
+
+        "transport", "travel" ->
+            Icons.Default.DirectionsBus
+
+        "shopping" ->
+            Icons.Default.ShoppingBag
+
+        "bills", "utilities" ->
+            Icons.Default.Payments
+
+        "health", "medical" ->
+            Icons.Default.Favorite
+
+        "education" ->
+            Icons.Default.School
+
+        "salary", "income" ->
+            Icons.Default.ArrowUpward
+
+        "entertainment" ->
+            Icons.Default.Category
+
+        else ->
+            Icons.Default.MoreHoriz
     }
 }
