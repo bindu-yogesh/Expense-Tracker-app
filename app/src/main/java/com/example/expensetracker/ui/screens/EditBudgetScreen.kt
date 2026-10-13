@@ -1,6 +1,6 @@
+
 package com.example.expensetracker.ui.screens
 
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -17,9 +17,13 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Payments
+import androidx.compose.material.icons.filled.Savings
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.OutlinedTextField
@@ -43,12 +47,14 @@ import androidx.compose.ui.unit.sp
 import com.example.expensetracker.data.local.BudgetEntity
 import com.example.expensetracker.viewmodel.BudgetViewModel
 
-private val EditBudgetBackground = Color(0xFF0B1120)
-private val EditBudgetCard = Color(0xFF151F32)
-private val EditBudgetBorder = Color(0xFF29364B)
-private val EditBudgetText = Color(0xFFF8FAFC)
-private val EditBudgetMuted = Color(0xFF94A3B8)
-private val EditBudgetBlue = Color(0xFF60A5FA)
+private val EditBudgetBackground = Color(0xFFF3F8FC)
+private val EditBudgetCard = Color(0xFFFFFFFF)
+private val EditBudgetBorder = Color(0xFFE0EAF3)
+private val EditBudgetText = Color(0xFF243B53)
+private val EditBudgetMuted = Color(0xFF71849A)
+private val EditBudgetBlue = Color(0xFF5AA9E6)
+private val EditBudgetLightBlue = Color(0xFFE4F2FF)
+private val EditBudgetDeepBlue = Color(0xFF356F9F)
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -91,9 +97,7 @@ fun EditBudgetScreen(
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = EditBudgetBackground,
-                    titleContentColor = EditBudgetText,
-                    navigationIconContentColor = EditBudgetText
+                    containerColor = EditBudgetBackground
                 )
             )
         }
@@ -105,159 +109,190 @@ fun EditBudgetScreen(
                 .padding(paddingValues)
                 .imePadding()
                 .verticalScroll(rememberScrollState())
-                .padding(20.dp),
+                .padding(horizontal = 20.dp, vertical = 18.dp),
             verticalArrangement = Arrangement.spacedBy(20.dp)
         ) {
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
                     .background(
-                        EditBudgetCard,
-                        RoundedCornerShape(22.dp)
+                        color = EditBudgetLightBlue,
+                        shape = RoundedCornerShape(24.dp)
                     )
-                    .padding(20.dp),
-                verticalArrangement = Arrangement.spacedBy(10.dp)
+                    .padding(22.dp),
+                verticalArrangement = Arrangement.spacedBy(12.dp)
             ) {
+                Icon(
+                    imageVector = Icons.Default.Savings,
+                    contentDescription = null,
+                    tint = EditBudgetDeepBlue
+                )
+
                 Text(
-                    text = "Update your spending limit",
+                    text = "Stay in control of your spending",
                     color = EditBudgetText,
-                    fontSize = 20.sp,
-                    fontWeight = FontWeight.Bold
+                    fontSize = 23.sp,
+                    fontWeight = FontWeight.Bold,
+                    lineHeight = 30.sp
                 )
 
                 Text(
-                    text = "Change the monthly amount for this category.",
+                    text = "Adjust your monthly limit to match your current needs.",
                     color = EditBudgetMuted,
-                    fontSize = 14.sp
-                )
-
-                Spacer(Modifier.height(4.dp))
-
-                Text(
-                    text = "CATEGORY",
-                    color = EditBudgetMuted,
-                    fontSize = 12.sp,
-                    fontWeight = FontWeight.Bold
-                )
-
-                Text(
-                    text = budget.category,
-                    color = EditBudgetBlue,
-                    fontSize = 17.sp,
-                    fontWeight = FontWeight.SemiBold
+                    fontSize = 14.sp,
+                    lineHeight = 21.sp
                 )
             }
 
-            Column(
-                verticalArrangement = Arrangement.spacedBy(10.dp)
+            Card(
+                modifier = Modifier.fillMaxWidth(),
+                shape = RoundedCornerShape(22.dp),
+                colors = CardDefaults.cardColors(
+                    containerColor = EditBudgetCard
+                ),
+                border = androidx.compose.foundation.BorderStroke(
+                    1.dp,
+                    EditBudgetBorder
+                ),
+                elevation = CardDefaults.cardElevation(
+                    defaultElevation = 0.dp
+                )
             ) {
-                Text(
-                    text = "MONTHLY LIMIT",
-                    color = EditBudgetMuted,
-                    fontSize = 12.sp,
-                    fontWeight = FontWeight.Bold
-                )
-
-                OutlinedTextField(
-                    value = amountText,
-                    onValueChange = { input ->
-                        amountText = input.filter { it.isDigit() }
-                        errorMessage = null
-                    },
-                    label = {
-                        Text("Budget amount")
-                    },
-                    placeholder = {
-                        Text("Enter amount")
-                    },
-                    leadingIcon = {
-                        Icon(
-                            imageVector = Icons.Default.Payments,
-                            contentDescription = null,
-                            tint = EditBudgetBlue
-                        )
-                    },
-                    prefix = {
-                        Text("₹")
-                    },
-                    singleLine = true,
-                    keyboardOptions = KeyboardOptions(
-                        keyboardType = KeyboardType.Number
-                    ),
-                    modifier = Modifier.fillMaxWidth(),
-                    shape = RoundedCornerShape(16.dp),
-                    colors = OutlinedTextFieldDefaults.colors(
-                        focusedTextColor = EditBudgetText,
-                        unfocusedTextColor = EditBudgetText,
-                        focusedLabelColor = EditBudgetBlue,
-                        unfocusedLabelColor = EditBudgetMuted,
-                        focusedPlaceholderColor = EditBudgetMuted,
-                        unfocusedPlaceholderColor = EditBudgetMuted,
-                        focusedBorderColor = EditBudgetBlue,
-                        unfocusedBorderColor = EditBudgetBorder,
-                        focusedContainerColor = EditBudgetCard,
-                        unfocusedContainerColor = EditBudgetCard,
-                        focusedLeadingIconColor = EditBudgetBlue,
-                        unfocusedLeadingIconColor = EditBudgetMuted,
-                        focusedPrefixColor = EditBudgetText,
-                        unfocusedPrefixColor = EditBudgetText,
-                        cursorColor = EditBudgetBlue
+                Column(
+                    modifier = Modifier.padding(20.dp),
+                    verticalArrangement = Arrangement.spacedBy(18.dp)
+                ) {
+                    Text(
+                        text = "Budget details",
+                        color = EditBudgetText,
+                        fontSize = 19.sp,
+                        fontWeight = FontWeight.Bold
                     )
-                )
 
-                Text(
-                    text = "Keep your budget realistic and adjust it whenever your needs change.",
-                    color = EditBudgetMuted,
-                    fontSize = 12.sp
-                )
+                    Column(
+                        verticalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        Text(
+                            text = "CATEGORY",
+                            color = EditBudgetMuted,
+                            fontSize = 12.sp,
+                            fontWeight = FontWeight.Bold
+                        )
+
+                        Text(
+                            text = budget.category,
+                            color = EditBudgetDeepBlue,
+                            fontSize = 17.sp,
+                            fontWeight = FontWeight.SemiBold
+                        )
+                    }
+
+                    Column(
+                        verticalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        Text(
+                            text = "MONTHLY LIMIT",
+                            color = EditBudgetMuted,
+                            fontSize = 12.sp,
+                            fontWeight = FontWeight.Bold
+                        )
+
+                        OutlinedTextField(
+                            value = amountText,
+                            onValueChange = { input ->
+                                amountText = input.filter { it.isDigit() }
+                                errorMessage = null
+                            },
+                            label = {
+                                Text("Budget amount")
+                            },
+                            placeholder = {
+                                Text("Enter amount")
+                            },
+                            leadingIcon = {
+                                Icon(
+                                    imageVector = Icons.Default.Payments,
+                                    contentDescription = null,
+                                    tint = EditBudgetBlue
+                                )
+                            },
+                            prefix = {
+                                Text("₹")
+                            },
+                            singleLine = true,
+                            keyboardOptions = KeyboardOptions(
+                                keyboardType = KeyboardType.Number
+                            ),
+                            modifier = Modifier.fillMaxWidth(),
+                            shape = RoundedCornerShape(16.dp),
+                            colors = OutlinedTextFieldDefaults.colors(
+                                focusedTextColor = EditBudgetText,
+                                unfocusedTextColor = EditBudgetText,
+                                focusedLabelColor = EditBudgetDeepBlue,
+                                unfocusedLabelColor = EditBudgetMuted,
+                                focusedPlaceholderColor = EditBudgetMuted,
+                                unfocusedPlaceholderColor = EditBudgetMuted,
+                                focusedBorderColor = EditBudgetBlue,
+                                unfocusedBorderColor = EditBudgetBorder,
+                                focusedContainerColor = EditBudgetCard,
+                                unfocusedContainerColor = EditBudgetCard,
+                                focusedLeadingIconColor = EditBudgetBlue,
+                                unfocusedLeadingIconColor = EditBudgetMuted,
+                                focusedPrefixColor = EditBudgetText,
+                                unfocusedPrefixColor = EditBudgetText,
+                                cursorColor = EditBudgetBlue
+                            )
+                        )
+
+                        Text(
+                            text = "Set a realistic limit for this category each month.",
+                            color = EditBudgetMuted,
+                            fontSize = 12.sp,
+                            lineHeight = 18.sp
+                        )
+                    }
+                }
             }
-
-            Spacer(Modifier.height(4.dp))
 
             Button(
                 onClick = {
-                    if (isSaving) {
-                        return@Button
-                    }
+                    if (isSaving) return@Button
 
                     val amount = amountText.toLongOrNull()
 
                     if (amount == null || amount <= 0L) {
-                        errorMessage = "Please enter a valid budget amount."
+                        errorMessage = "Please enter a valid budget amount greater than zero."
                         return@Button
                     }
 
                     isSaving = true
 
-                    try {
-                        budgetViewModel.updateBudget(
-                            budget.copy(amount = amount)
-                        )
-                        onBudgetUpdated()
-                    } catch (exception: Exception) {
-                        isSaving = false
-                        errorMessage = "Couldn't update the budget. Please try again."
-                    }
+                    budgetViewModel.updateBudget(
+                        budget.copy(amount = amount)
+                    )
+
+                    onBudgetUpdated()
                 },
                 enabled = !isSaving,
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(54.dp),
-                shape = RoundedCornerShape(16.dp),
+                    .height(56.dp),
+                shape = RoundedCornerShape(17.dp),
                 colors = ButtonDefaults.buttonColors(
-                    containerColor = Color(0xFF2563EB),
+                    containerColor = EditBudgetBlue,
                     contentColor = Color.White,
-                    disabledContainerColor = Color(0xFF334155),
+                    disabledContainerColor = EditBudgetBorder,
                     disabledContentColor = EditBudgetMuted
                 )
             ) {
                 Text(
-                    text = if (isSaving) "Updating..." else "Update Budget",
+                    text = if (isSaving) "Updating..." else "Save Changes",
+                    fontSize = 16.sp,
                     fontWeight = FontWeight.Bold
                 )
             }
 
-            Spacer(Modifier.height(12.dp))
+            Spacer(modifier = Modifier.height(8.dp))
         }
     }
 
@@ -268,7 +303,7 @@ fun EditBudgetScreen(
             },
             title = {
                 Text(
-                    text = "Couldn't update budget",
+                    text = "Check your budget",
                     color = EditBudgetText,
                     fontWeight = FontWeight.Bold
                 )
@@ -287,7 +322,7 @@ fun EditBudgetScreen(
                 ) {
                     Text(
                         text = "OK",
-                        color = EditBudgetBlue
+                        color = EditBudgetDeepBlue
                     )
                 }
             },
